@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 
+API_KEY = config("API_KEY")
+API_SECRET = config("API_SECRET")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -49,12 +52,6 @@ INSTALLED_APPS += [
 ]
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dfcjz5pcg',
-    'API_KEY': '496787529675797',
-    'API_SECRET': '2njCzi9Zy837nVUUGIyURRxgvFk',
-}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -152,6 +149,6 @@ import cloudinary
 
 cloudinary.config(
     cloud_name = "dfcjz5pcg",
-    api_key = "496787529675797",
-    api_secret = "2njCzi9Zy837nVUUGIyURRxgvFk"
+    api_key = API_KEY,
+    api_secret = API_SECRET
 )
