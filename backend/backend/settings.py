@@ -43,6 +43,19 @@ INSTALLED_APPS = [
     'core',
 ]
 
+INSTALLED_APPS += [
+    'cloudinary',
+    'cloudinary_storage',
+]
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dfcjz5pcg',
+    'API_KEY': '496787529675797',
+    'API_SECRET': '2njCzi9Zy837nVUUGIyURRxgvFk',
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -133,3 +146,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+import cloudinary
+
+cloudinary.config(
+    cloud_name = "dfcjz5pcg",
+    api_key = "496787529675797",
+    api_secret = "2njCzi9Zy837nVUUGIyURRxgvFk"
+)
