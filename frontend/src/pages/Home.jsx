@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PostList from '../components/PostList';
 
 function Home() {
   const navigate = useNavigate();
@@ -9,7 +10,11 @@ function Home() {
     if (!token) navigate('/login');
   }, []);
 
-  return <h1 className="text-2xl font-semibold">Welcome to RedditGram 👋</h1>;
+  return (
+    <div className="max-w-2xl mx-auto">
+      <PostList />
+    </div>
+  );
 }
 
 export default Home;

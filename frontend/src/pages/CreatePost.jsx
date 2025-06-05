@@ -4,34 +4,17 @@ import { useNavigate } from 'react-router-dom';
 
 function CreatePost() {
   const [caption, setCaption] = useState('');
-  const [image, setImage] = useState(null);
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!image) return alert("Please select an image.");
+    if (!caption.trim()) return alert("Caption cannot be empty.");
 
     try {
-      // 1. Upload image to Cloudinary
-      const formData = new FormData();
-      formData.append('file', image);
-      formData.append('upload_preset', 'djthedon'); // or your preset name
-
-      const cloudinaryRes = await axios.post(
-        'https://api.cloudinary.com/v1_1/dfcjz5pcg/image/upload',
-        formData
-      );
-
-      const imageUrl = cloudinaryRes.data.secure_url;
-
-      // 2. Send post to Django
       await axios.post(
         'http://localhost:8000/api/posts/',
-        {
-          caption,
-          image_url: imageUrl,
-        },
+        { caption },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('access')}`,
@@ -42,25 +25,22 @@ function CreatePost() {
       navigate('/');
     } catch (err) {
       console.error(err);
-      alert('Post upload failed');
+      alert('Post creation failed');
     }
   };
 
+
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10 space-y-4">
+    <form onSubmit={handleSubmit}>
       <textarea
-        className="w-full p-2 border"
-        rows="3"
-        placeholder="Write your caption..."
-        onChange={e => setCaption(e.target.value)}
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+        placeholder="What's on your mind?"
+        className="w-full p-2 border rounded"
       />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={e => setImage(e.target.files[0])}
-        className="w-full"
-      />
-      <button className="w-full bg-indigo-600 text-white py-2">Post</button>
+      <button type="submit" className="mt-2 bg-blue-500 text-white px-4 py-1 rounded">
+        Post
+      </button>
     </form>
   );
 }
