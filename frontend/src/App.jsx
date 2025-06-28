@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import CreatePost from './pages/createPost';
+import CreatePost from './pages/CreatePost';
 
 function App() {
   return (
