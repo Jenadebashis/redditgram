@@ -13,7 +13,7 @@ function CreatePost() {
 
     try {
       await axios.post(
-        'http://localhost:8000/api/posts/',
+        'http://localhost:9000/api/posts/',
         { caption },
         {
           headers: {
