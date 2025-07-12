@@ -13,8 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 from decouple import config
 
-API_KEY = config("API_KEY")
-API_SECRET = config("API_SECRET")
+# Provide defaults so tests can run without a local .env file
+API_KEY = config("API_KEY", default="")
+API_SECRET = config("API_SECRET", default="")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

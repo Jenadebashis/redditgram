@@ -9,7 +9,7 @@ function Navbar() {
 
   useEffect(() => {
     if (token) {
-      axios.get('http://localhost:8000/api/me/', {
+      axios.get('http://localhost:9000/api/me/', {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => setUser(res.data))
