@@ -26,6 +26,44 @@ class PostAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Post.objects.filter(caption="hello").exists())
 
+    def test_retrieve_post_authenticated(self):
+        post = Post.objects.create(author=self.user, caption="hello")
+        url = reverse("post-detail", args=[post.id])
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], post.id)
+
+    def test_update_post_only_author(self):
+        post = Post.objects.create(author=self.user, caption="hello")
+        url = reverse("post-detail", args=[post.id])
+        other = User.objects.create_user(username="other", password="pass")
+
+        self.client.force_authenticate(user=other)
+        resp = self.client.patch(url, {"caption": "no"})
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_authenticate(user=self.user)
+        resp = self.client.patch(url, {"caption": "updated"})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        post.refresh_from_db()
+        self.assertEqual(post.caption, "updated")
+
+    def test_delete_post_only_author(self):
+        post = Post.objects.create(author=self.user, caption="bye")
+        url = reverse("post-detail", args=[post.id])
+        other = User.objects.create_user(username="other2", password="pass")
+
+        self.client.force_authenticate(user=other)
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Post.objects.filter(id=post.id).exists())
+
+        self.client.force_authenticate(user=self.user)
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Post.objects.filter(id=post.id).exists())
+
 
 class RegisterViewTestCase(TestCase):
     def setUp(self):
