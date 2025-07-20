@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import API from '../api';
 import { useNavigate } from 'react-router-dom';
+import { PostCard } from './PostCard';
 
 const PostList = () => {
   const [posts, setPosts] = useState([]);
@@ -68,27 +69,8 @@ const PostList = () => {
       )}
 
       {posts.map(post => (
-        <div
-          key={post.id}
-          className="bg-white border border-gray-200 rounded-xl p-5 mb-5 shadow-sm hover:shadow-md transition-shadow duration-300"
-        >
-          {/* Username */}
-          <div className="flex items-center space-x-2 mb-2">
-            <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold">
-              {post.author_username?.charAt(0).toUpperCase()}
-            </div>
-            <p className="font-medium text-indigo-700">@{post.author_username}</p>
-          </div>
-
-          {/* Post caption */}
-          <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
-            {post.caption}
-          </p>
-
-          {/* Timestamp */}
-          <p className="text-xs text-gray-400 text-right mt-3">
-            {new Date(post.created_at).toLocaleString()}
-          </p>
+        <div key={post.id} className="mb-6">
+          <PostCard post={post} />
         </div>
       ))}
 
