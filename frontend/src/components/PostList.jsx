@@ -69,9 +69,7 @@ const PostList = () => {
       )}
 
       {posts.map(post => (
-        <div key={post.id} className="mb-6">
-          <PostCard post={post} />
-        </div>
+          <PostCard key={post.id} post={post} />
       ))}
 
       {nextPage && (
