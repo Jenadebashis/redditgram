@@ -1,0 +1,7 @@
+{
+  "devDependencies": {
+    "@babel/plugin-transform-react-jsx-source": "^7.27.1",
+    "@tailwindcss/postcss": "^4.1.11",
+    "babel-plugin-react-display-name": "^2.0.0"
+  }
+}
