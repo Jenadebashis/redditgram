@@ -68,7 +68,10 @@ const PostList = () => {
       )}
 
       {posts.map(post => (
-        <div key={post.id} className="p-4 border rounded shadow mb-4 bg-white">
+        <div
+          key={post.id}
+          className="bg-white border border-gray-200 rounded-lg p-6 mb-4 shadow-sm hover:shadow-lg transition-shadow"
+        >
           <p className="font-semibold text-indigo-700">@{post.author_username}</p>
           <p className="mt-1">{post.caption}</p>
           <p className="text-xs text-gray-400 mt-2">
