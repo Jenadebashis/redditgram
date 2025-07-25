@@ -24,10 +24,24 @@ const getColorFromUsername = (username) => {
   return colors[sum % colors.length];
 };
 
+const getAvatarImage = (username) => {
+  if (!username) return null;
+  const imageCount = 5; // Assuming 7 profile images available
+  if (typeof username !== "string") return `/profile_images/1.webp`; // Default image
+  let sum = 0;
+  for (let i = 0; i < username.length; i++) {
+    sum += username.charCodeAt(i);
+  }
+  const imageIndex = (sum % imageCount) + 1; // 1 to 5
+  return `/profile_images/${imageIndex}.webp`; // Assumes images are in /public
+};
+
+
 // 🔹 Reusable post card component
 export const PostCard = ({ post }) => {
   const bgColor = getColorFromUsername(post.author_username);
   const initial = post.author_username?.charAt(0).toUpperCase();
+  const avatarImage = getAvatarImage(post.author_username);
 
   return (
     <motion.div
@@ -39,9 +53,17 @@ export const PostCard = ({ post }) => {
     >
       {/* Header */}
       <div className="flex items-center space-x-3 mb-3">
-        <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold bg-white text-black shadow">
-          {initial}
-        </div>
+        {avatarImage ? (
+          <img
+            src={avatarImage}
+            alt={post.author_username}
+            className="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
+          />
+        ) : (
+          <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold bg-white text-black shadow">
+            {initial}
+          </div>
+        )}
         <p className="font-medium text-white text-sm">
           @{post.author_username}
         </p>
