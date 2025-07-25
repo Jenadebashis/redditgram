@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 // Utility to generate background color from username
 const getColorFromUsername = (username) => {
@@ -29,9 +30,12 @@ export const PostCard = ({ post }) => {
   const initial = post.author_username?.charAt(0).toUpperCase();
 
   return (
-    <div
+    <motion.div
       key={post.id}
-      className={`text-white border border-gray-200 rounded-xl p-5 mb-5 shadow-sm hover:shadow-md transition-shadow duration-300 ${bgColor}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className={`${bgColor} text-white rounded-xl p-5 mb-5 shadow-sm hover:shadow-md transition-shadow duration-300`}
     >
       {/* Header */}
       <div className="flex items-center space-x-3 mb-3">
@@ -52,6 +56,6 @@ export const PostCard = ({ post }) => {
       <p className="text-xs text-white/80 text-right mt-3">
         {new Date(post.created_at).toLocaleString()}
       </p>
-    </div>
+    </motion.div>
   );
 };
