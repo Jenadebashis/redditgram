@@ -31,7 +31,7 @@ export const PostCard = ({ post }) => {
   return (
     <div
       key={post.id}
-      className={`${bgColor} text-white border border-gray-200 rounded-xl p-5 mb-5 shadow-sm hover:shadow-md transition-shadow duration-300`}
+      className={`text-white border border-gray-200 rounded-xl p-5 mb-5 shadow-sm hover:shadow-md transition-shadow duration-300 ${bgColor}`}
     >
       {/* Header */}
       <div className="flex items-center space-x-3 mb-3">
