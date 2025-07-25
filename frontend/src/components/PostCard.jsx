@@ -1,6 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
-
 // Utility to generate background color from username
 const getColorFromUsername = (username) => {
   const colors = [
@@ -19,15 +17,6 @@ const getColorFromUsername = (username) => {
   }
   colors[sum % colors.length] = `bg-${colors[sum % colors.length].split('-')[1]}-500`;
   return colors[sum % colors.length];
-};
-
-PostCard.propTypes = {
-  post: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-    author_username: PropTypes.string.isRequired,
-    caption: PropTypes.string,
-    created_at: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.instanceOf(Date)]).isRequired,
-  }).isRequired,
 };
 
 // 🔹 Reusable post card component
