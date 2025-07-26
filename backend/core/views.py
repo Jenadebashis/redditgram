@@ -12,8 +12,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework import status
 from .models import Post
 from .serializers import PostSerializer
 from django.http import JsonResponse
@@ -27,6 +29,20 @@ def get_user_info(request):
         'email': user.email,
     })
     
+
+@api_view(['GET'])
+def get_user_posts(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    posts = Post.objects.filter(author=user).order_by('-created_at')
+    paginator = PageNumberPagination()
+    paginator.page_size = 5  # You can customize the page size
+    result_page = paginator.paginate_queryset(posts, request)
+    serializer = PostSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 class UserSerializer(ModelSerializer):
     class Meta:
