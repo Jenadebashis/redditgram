@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import API from "../api";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 // Utility to generate background color from username
@@ -45,12 +46,40 @@ export const PostCard = ({ post }) => {
   const avatarImage = getAvatarImage(post.author_username);
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
 
-  console.log('the value of the constants are:', {
-    bgColor,
-    initial,
-    avatarImage,
-    timeAgo,
-  });
+  const [liked, setLiked] = useState(post.is_liked);
+  const [likeCount, setLikeCount] = useState(post.like_count);
+  const [comments, setComments] = useState([]);
+  const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState("");
+
+  useEffect(() => {
+    if (showComments) {
+      API.get(`/posts/${post.id}/comments/`).then(res => setComments(res.data));
+    }
+  }, [showComments, post.id]);
+
+  const toggleLike = async () => {
+    try {
+      const res = await API.post(`/posts/${post.id}/like/`);
+      setLiked(res.data.liked);
+      setLikeCount(res.data.like_count);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    try {
+      await API.post(`/posts/${post.id}/comments/`, { text: newComment });
+      setNewComment("");
+      const res = await API.get(`/posts/${post.id}/comments/`);
+      setComments(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <motion.div
@@ -84,8 +113,37 @@ export const PostCard = ({ post }) => {
         {post.caption}
       </p>
 
-      {/* Timestamp */}
-      <p className="text-xs text-white/80 text-right mt-3">{timeAgo}</p>
+      {/* Like & Comments */}
+      <div className="flex items-center mt-3 space-x-4">
+        <button onClick={toggleLike} className="text-sm">
+          {liked ? "💖" : "🤍"} {likeCount}
+        </button>
+        <button onClick={() => setShowComments(!showComments)} className="text-sm">
+          💬 {post.comment_count}
+        </button>
+        <span className="ml-auto text-xs text-white/80">{timeAgo}</span>
+      </div>
+
+      {showComments && (
+        <div className="mt-3 bg-white/10 p-3 rounded">
+          {comments.map((c) => (
+            <p key={c.id} className="text-sm mb-1">
+              <strong>@{c.author_username}</strong>: {c.text}
+            </p>
+          ))}
+          <form onSubmit={handleComment} className="mt-2 flex">
+            <input
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="flex-grow text-black p-1 rounded"
+              placeholder="Add a comment"
+            />
+            <button type="submit" className="ml-2 px-2 text-sm bg-indigo-600 rounded">
+              Post
+            </button>
+          </form>
+        </div>
+      )}
     </motion.div>
   );
 };

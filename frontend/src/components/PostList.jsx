@@ -3,7 +3,7 @@ import API from '../api';
 import { useNavigate } from 'react-router-dom';
 import { PostCard } from './PostCard';
 
-const PostList = () => {
+const PostList = ({ initialUrl = '/posts/' }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -12,7 +12,7 @@ const PostList = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('access');
 
-  const fetchPosts = (url = '/posts/') => {
+  const fetchPosts = (url = initialUrl) => {
     API.get(url)
       .then(res => {
         setPosts(prev => [...prev, ...res.data.results]);
@@ -27,8 +27,9 @@ const PostList = () => {
   };
 
   useEffect(() => {
-    fetchPosts(); // fetch initial page
-  }, []);
+    setPosts([]);
+    fetchPosts(initialUrl); // fetch initial page
+  }, [initialUrl]);
 
   if (loading) {
     return (
