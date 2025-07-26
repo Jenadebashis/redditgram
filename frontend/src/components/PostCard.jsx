@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-
+import { formatDistanceToNow } from "date-fns";
 // Utility to generate background color from username
 const getColorFromUsername = (username) => {
   if (!username || typeof username !== "string") return "bg-green-500";
@@ -42,14 +42,23 @@ export const PostCard = ({ post }) => {
   const bgColor = getColorFromUsername(post.author_username);
   const initial = post.author_username?.charAt(0).toUpperCase();
   const avatarImage = getAvatarImage(post.author_username);
+  const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
+
+  console.log('the value of the constants are:', {
+    bgColor,
+    initial,
+    avatarImage,
+    timeAgo,
+  });
 
   return (
     <motion.div
       key={post.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.03 }}
       transition={{ duration: 0.4 }}
-      className={`${bgColor} text-white rounded-xl p-5 mb-5 shadow-sm hover:shadow-md transition-shadow duration-300`}
+      className={`${bgColor} text-white rounded-xl p-5 mb-5 shadow-sm hover:shadow-lg transition-all duration-300`}
     >
       {/* Header */}
       <div className="flex items-center space-x-3 mb-3">
@@ -75,9 +84,7 @@ export const PostCard = ({ post }) => {
       </p>
 
       {/* Timestamp */}
-      <p className="text-xs text-white/80 text-right mt-3">
-        {new Date(post.created_at).toLocaleString()}
-      </p>
+      <p className="text-xs text-white/80 text-right mt-3">{timeAgo}</p>
     </motion.div>
   );
 };
