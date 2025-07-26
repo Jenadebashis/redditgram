@@ -37,34 +37,53 @@ const UserPosts = () => {
   };
 
   return (
-    <div className="flex justify-center px-4"> {/* centers content */}
-      <div className="w-full max-w-xl"> {/* same width as homepage */}
-        <h2 className="text-xl font-semibold text-white mb-4">
-          Posts by <span className="text-yellow-300">@{username}</span>
-        </h2>
+    <div className="flex justify-center px-4">
+      <div className="w-full max-w-5xl flex flex-col md:flex-row gap-6">
+        {/* Sidebar */}
+        <div className="w-full md:w-1/3 bg-white p-5 rounded-xl shadow">
+          <div className="flex flex-col items-center text-center">
+            <img
+              src={`/profile_images/${((username.charCodeAt(0) % 5) + 1)}.webp`}
+              alt={username}
+              className="w-24 h-24 rounded-full object-cover border-4 border-indigo-500"
+            />
+            <h2 className="mt-3 text-xl font-bold text-indigo-600">@{username}</h2>
+            <p className="text-sm text-gray-600 mt-2">
+              {/* Fake bio — update this dynamically if available */}
+              Just another RedditGram user exploring the world 🌍
+            </p>
+            <p className="mt-3 text-sm text-gray-700">
+              Total Posts: <span className="font-semibold">{posts.length}</span>
+            </p>
+          </div>
+        </div>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        {loading && posts.length === 0 && <p className="text-white">Loading...</p>}
+        {/* Main Content */}
+        <div className="w-full md:w-2/3 mt-4">
+          {error && <p className="text-red-500 mb-4">{error}</p>}
+          {loading && posts.length === 0 && <p className="text-white">Loading...</p>}
 
-        {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
-        ))}
+          {posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
 
-        {!loading && nextPage && (
-          <button
-            onClick={handleLoadMore}
-            className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
-          >
-            Load More
-          </button>
-        )}
+          {!loading && nextPage && (
+            <button
+              onClick={handleLoadMore}
+              className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+            >
+              Load More
+            </button>
+          )}
 
-        {!loading && posts.length === 0 && !error && (
-          <p className="text-gray-400">No posts found for @{username}.</p>
-        )}
+          {!loading && posts.length === 0 && !error && (
+            <p className="text-gray-400">No posts found for @{username}.</p>
+          )}
+        </div>
       </div>
     </div>
   );
+
 };
 
 export default UserPosts;
