@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
 // Utility to generate background color from username
@@ -73,9 +74,9 @@ export const PostCard = ({ post }) => {
             {initial}
           </div>
         )}
-        <p className="font-medium text-white text-sm">
+        <Link to={`/user/${post.author_username}`} className="font-medium text-white text-sm hover:underline">
           @{post.author_username}
-        </p>
+        </Link>
       </div>
 
       {/* Caption */}
