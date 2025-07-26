@@ -37,30 +37,32 @@ const UserPosts = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4 text-white">
-        Posts by @{username}
-      </h2>
+    <div className="flex justify-center px-4"> {/* centers content */}
+      <div className="w-full max-w-xl"> {/* same width as homepage */}
+        <h2 className="text-xl font-semibold text-white mb-4">
+          Posts by <span className="text-yellow-300">@{username}</span>
+        </h2>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {loading && posts.length === 0 && <p className="text-white">Loading...</p>}
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {loading && posts.length === 0 && <p className="text-white">Loading...</p>}
 
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
+        {posts.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
 
-      {!loading && nextPage && (
-        <button
-          onClick={handleLoadMore}
-          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
-        >
-          Load More
-        </button>
-      )}
+        {!loading && nextPage && (
+          <button
+            onClick={handleLoadMore}
+            className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+          >
+            Load More
+          </button>
+        )}
 
-      {!loading && posts.length === 0 && !error && (
-        <p className="text-gray-400">No posts found for @{username}.</p>
-      )}
+        {!loading && posts.length === 0 && !error && (
+          <p className="text-gray-400">No posts found for @{username}.</p>
+        )}
+      </div>
     </div>
   );
 };
