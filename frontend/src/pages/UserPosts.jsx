@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import API from '../api';
 import { PostCard } from '../components/PostCard';
 
@@ -9,6 +10,7 @@ const UserPosts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [nextPage, setNextPage] = useState(null);
+  const [bio, setBio] = useState('');
 
   const fetchUserPosts = (url = `/posts/user/${username}/`) => {
     API.get(url)
@@ -40,7 +42,12 @@ const UserPosts = () => {
     <div className="flex justify-center px-4">
       <div className="w-full max-w-5xl flex flex-col md:flex-row gap-6">
         {/* Sidebar */}
-        <div className="w-full md:w-1/3 bg-white p-5 rounded-xl shadow">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full md:w-1/3 bg-white p-5 rounded-xl shadow"
+        >
           <div className="flex flex-col items-center text-center">
             <img
               src={`/profile_images/${((username.charCodeAt(0) % 5) + 1)}.webp`}
@@ -49,14 +56,14 @@ const UserPosts = () => {
             />
             <h2 className="mt-3 text-xl font-bold text-indigo-600">@{username}</h2>
             <p className="text-sm text-gray-600 mt-2">
-              {/* Fake bio — update this dynamically if available */}
-              Just another RedditGram user exploring the world 🌍
+              {bio || "This user hasn’t written a bio yet."}
             </p>
             <p className="mt-3 text-sm text-gray-700">
               Total Posts: <span className="font-semibold">{posts.length}</span>
             </p>
           </div>
-        </div>
+        </motion.div>
+
 
         {/* Main Content */}
         <div className="w-full md:w-2/3 mt-4">
