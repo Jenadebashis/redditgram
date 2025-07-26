@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import API from '../api';
 import { PostCard } from '../components/PostCard';
+import EditBio from '../components/UpdateBio';
 
 const UserPosts = () => {
   const { username } = useParams();
@@ -11,17 +12,24 @@ const UserPosts = () => {
   const [error, setError] = useState('');
   const [nextPage, setNextPage] = useState(null);
   const [bio, setBio] = useState('');
+  const [editingBio, setEditingBio] = useState(false);
+  const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
+  const isOwner = loggedInUsername === username;
+
+  console.log(`Fetching posts for user: ${username} and bio: ${bio} and isOwner: ${isOwner} and loggedInUsername: ${loggedInUsername}`);
+
 
   const fetchUserPosts = (url = `/posts/user/${username}/`) => {
     API.get(url)
       .then((res) => {
-        setPosts((prev) => [...prev, ...res.data.results]);
+        setPosts((prev) => [...prev, ...res.data.results.posts]);
+        setBio(res.data.results.bio); // ✅ Extract bio
         setNextPage(res.data.next);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
-        setError('Failed to load user posts. Please try again later.');
+        setError("Failed to load user posts. Please try again later.");
         setLoading(false);
       });
   };
@@ -58,6 +66,28 @@ const UserPosts = () => {
             <p className="text-sm text-gray-600 mt-2">
               {bio || "This user hasn’t written a bio yet."}
             </p>
+            {isOwner && (
+              <>
+                {!editingBio && (
+                  <button
+                    onClick={() => setEditingBio(true)}
+                    className="mt-2 text-sm text-indigo-500 hover:underline"
+                  >
+                    Edit Bio
+                  </button>
+                )}
+
+                {editingBio && (
+                  <EditBio
+                    initialBio={bio}
+                    onUpdate={(newBio) => {
+                      setBio(newBio);
+                      setEditingBio(false);
+                    }}
+                  />
+                )}
+              </>
+            )}
             <p className="mt-3 text-sm text-gray-700">
               Total Posts: <span className="font-semibold">{posts.length}</span>
             </p>

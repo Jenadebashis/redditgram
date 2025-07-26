@@ -8,3 +8,11 @@ class Post(models.Model):
 
     def __str__(self):
         return f'{self.author.username} - {self.caption[:30]}'
+    
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True, default='')
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
