@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import API from '../api';
@@ -15,6 +16,14 @@ const UserPosts = () => {
   const [editingBio, setEditingBio] = useState(false);
   const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
   const isOwner = loggedInUsername === username;
+
+  const updatedBio = useSelector(state => state.user.bio); // Assuming you have a Redux store setup
+  useEffect(() => {
+    if (updatedBio) {
+      setBio(updatedBio);
+      setEditingBio(false); // Close edit mode after bio update
+    }
+  }, [updatedBio]);
 
   console.log(`Fetching posts for user: ${username} and bio: ${bio} and isOwner: ${isOwner} and loggedInUsername: ${loggedInUsername}`);
 
@@ -80,10 +89,6 @@ const UserPosts = () => {
                 {editingBio && (
                   <EditBio
                     initialBio={bio}
-                    onUpdate={(newBio) => {
-                      setBio(newBio);
-                      setEditingBio(false);
-                    }}
                   />
                 )}
               </>
