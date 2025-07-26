@@ -17,8 +17,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from .models import Post
-from .serializers import PostSerializer
+from .serializers import PostSerializer, ProfileSerializer
 from django.http import JsonResponse
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def user_bio_view(request):
+    profile = request.user.profile
+
+    if request.method == 'GET':
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+
+    if request.method == 'PUT':
+        serializer = ProfileSerializer(profile, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -38,11 +54,21 @@ def get_user_posts(request, username):
         return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     posts = Post.objects.filter(author=user).order_by('-created_at')
+
     paginator = PageNumberPagination()
-    paginator.page_size = 5  # You can customize the page size
-    result_page = paginator.paginate_queryset(posts, request)
-    serializer = PostSerializer(result_page, many=True)
-    return paginator.get_paginated_response(serializer.data)
+    paginator.page_size = 5
+    paginated_posts = paginator.paginate_queryset(posts, request)
+
+    serialized_posts = PostSerializer(paginated_posts, many=True)
+
+    # 🔥 Get bio from profile
+    bio = getattr(user.profile, 'bio', '')
+
+    return paginator.get_paginated_response({
+        'posts': serialized_posts.data,
+        'bio': bio,
+        'username': user.username,
+    })
 
 class UserSerializer(ModelSerializer):
     class Meta:
