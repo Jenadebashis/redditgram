@@ -277,7 +277,10 @@ def password_reset_request(request):
         [email],
         fail_silently=True,
     )
-    return Response({'detail': 'If an account exists, a password reset email has been sent.'})
+    return Response({
+        'detail': 'If an account exists, a password reset email has been sent.',
+        'reset_link': link,
+    })
 
 
 @api_view(['POST'])

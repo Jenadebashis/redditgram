@@ -14,7 +14,6 @@ from .views import (
     search,
     verify_email,
     password_reset_request,
-    password_reset_confirm,
     update_avatar,
 )
 
