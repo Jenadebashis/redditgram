@@ -26,6 +26,7 @@ const Login = () => {
       // Redirect or navigate
     } catch (err) {
       console.error('Login failed', err);
+      alert('Login failed. Please check your credentials and try again.');
     }
   };
 
@@ -51,6 +52,9 @@ const Login = () => {
       >
         Login
       </button>
+      <div>
+        <a href="/password-reset" className="text-sm text-indigo-600 hover:underline">Forgot password?</a>
+      </div>
     </form>
   );
 };
