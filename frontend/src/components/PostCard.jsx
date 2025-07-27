@@ -43,7 +43,7 @@ const getAvatarImage = (username) => {
 export const PostCard = ({ post }) => {
   const bgColor = getColorFromUsername(post.author_username);
   const initial = post.author_username?.charAt(0).toUpperCase();
-  const avatarImage = getAvatarImage(post.author_username);
+  const avatarImage = post.author_avatar || getAvatarImage(post.author_username);
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
 
   const [liked, setLiked] = useState(post.is_liked);

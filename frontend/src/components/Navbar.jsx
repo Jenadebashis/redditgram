@@ -52,7 +52,10 @@ function Navbar() {
             <Link to="/feed" className="text-gray-700 hover:text-indigo-600">Feed</Link>
             <Link to="/search" className="text-gray-700 hover:text-indigo-600">Search</Link>
             <Link to="/create" className="text-gray-700 hover:text-indigo-600">New Post</Link>
-            <span className="text-gray-700">👤 {user.username}</span>
+            {user.avatar && (
+              <img src={user.avatar} alt={user.username} className="inline w-8 h-8 rounded-full mr-2" />
+            )}
+            <span className="text-gray-700">{user.username}</span>
             <button onClick={handleLogout} className="text-red-500 hover:underline">Logout</button>
           </>
         ) : (
