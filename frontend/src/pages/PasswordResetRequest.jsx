@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from "react-toastify";
 
 const PasswordResetRequest = () => {
   const [email, setEmail] = useState('');
@@ -10,12 +11,12 @@ const PasswordResetRequest = () => {
     try {
       const res = await axios.post('http://localhost:9000/api/password-reset/', { email });
       if (res.data.reset_link) {
-        setMessage(`Reset link: ${res.data.reset_link}`);
+        window.location.href = res.data.reset_link;
       } else {
-        setMessage('If an account exists for that email, a reset link has been sent.');
+        toast.error('There was no account associated with this email. please give a valid email.');
       }
     } catch (err) {
-      setMessage('Something went wrong.');
+      toast.error(`Something went wrong. ${err}`);
     }
   };
 
