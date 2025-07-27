@@ -124,6 +124,12 @@ class CommentListCreateView(ListCreateAPIView):
         serializer.save(author=self.request.user, post=post)
 
 
+class CommentDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def like_post(request, post_id):

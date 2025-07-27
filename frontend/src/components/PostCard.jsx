@@ -51,6 +51,9 @@ export const PostCard = ({ post }) => {
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [editText, setEditText] = useState("");
+  const loggedInUsername = localStorage.getItem('username');
 
   useEffect(() => {
     if (showComments) {
@@ -74,6 +77,33 @@ export const PostCard = ({ post }) => {
     try {
       await API.post(`/posts/${post.id}/comments/`, { text: newComment });
       setNewComment("");
+      const res = await API.get(`/posts/${post.id}/comments/`);
+      setComments(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const startEdit = (c) => {
+    setEditCommentId(c.id);
+    setEditText(c.text);
+  };
+
+  const saveEdit = async (id) => {
+    try {
+      await API.put(`/comments/${id}/`, { text: editText });
+      const res = await API.get(`/posts/${post.id}/comments/`);
+      setComments(res.data);
+      setEditCommentId(null);
+      setEditText("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteComment = async (id) => {
+    try {
+      await API.delete(`/comments/${id}/`);
       const res = await API.get(`/posts/${post.id}/comments/`);
       setComments(res.data);
     } catch (err) {
@@ -129,9 +159,38 @@ export const PostCard = ({ post }) => {
       {showComments && (
         <div className="mt-3 bg-white/10 p-3 rounded">
           {comments?.results?.map?.((c) => (
-            <p key={c.id} className="text-sm mb-1">
-              <strong>@{c.author_username}</strong>: {c.text}
-            </p>
+            <div key={c.id} className="text-sm mb-1">
+              <strong>@{c.author_username}</strong>:
+              {editCommentId === c.id ? (
+                <>
+                  <input
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className="ml-1 p-1 rounded text-black"
+                  />
+                  <button onClick={() => saveEdit(c.id)} className="ml-1 text-xs text-indigo-500">
+                    Save
+                  </button>
+                  <button onClick={() => setEditCommentId(null)} className="ml-1 text-xs text-gray-500">
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <>
+                  {' '}{c.text}
+                  {loggedInUsername === c.author_username && (
+                    <>
+                      <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">
+                        Edit
+                      </button>
+                      <button onClick={() => deleteComment(c.id)} className="ml-1 text-xs text-red-500">
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
           ))}
           <form onSubmit={handleComment} className="mt-2 flex">
             <input
