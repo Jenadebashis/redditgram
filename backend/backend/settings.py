@@ -145,6 +145,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@example.com'
+
+# Base URL for links sent in emails
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 # Channels configuration
 CHANNEL_LAYERS = {
     'default': {
