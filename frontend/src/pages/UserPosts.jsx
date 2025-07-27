@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 import API from '../api';
 import { PostCard } from '../components/PostCard';
 import EditBio from '../components/UpdateBio';
@@ -80,10 +81,11 @@ const UserPosts = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setAvatar(res.data.avatar_url);
-      setUploadMsg('Avatar updated');
+      setUploadMsg('');
+      toast.success('Avatar updated successfully!');
     } catch (err) {
       console.error(err);
-      setUploadMsg('Upload failed');
+      toast.error('Failed to update avatar. Please try again.');
     }
   };
 
