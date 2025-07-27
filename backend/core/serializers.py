@@ -6,12 +6,14 @@ class PostSerializer(serializers.ModelSerializer):
     comment_count = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    author_avatar = serializers.SerializerMethodField()
     class Meta:
         model = Post
         fields = [
             'id',
             'author',
             'author_username',
+            'author_avatar',
             'caption',
             'created_at',
             'comment_count',
@@ -32,10 +34,27 @@ class PostSerializer(serializers.ModelSerializer):
             return obj.likes.filter(user=request.user).exists()
         return False
 
+    def get_author_avatar(self, obj):
+        avatar = getattr(obj.author.profile, 'avatar', None)
+        if avatar:
+            request = self.context.get('request')
+            url = avatar.url
+            return request.build_absolute_uri(url) if request else url
+        return None
+
 class ProfileSerializer(serializers.ModelSerializer):
+    avatar_url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Profile
-        fields = ['bio']
+        fields = ['bio', 'avatar', 'avatar_url']
+
+    def get_avatar_url(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            url = obj.avatar.url
+            return request.build_absolute_uri(url) if request else url
+        return None
 
 
 class CommentSerializer(serializers.ModelSerializer):

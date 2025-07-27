@@ -44,23 +44,39 @@ def user_bio_view(request):
     profile = request.user.profile
 
     if request.method == 'GET':
-        serializer = ProfileSerializer(profile)
+        serializer = ProfileSerializer(profile, context={'request': request})
         return Response(serializer.data)
 
     if request.method == 'PUT':
-        serializer = ProfileSerializer(profile, data=request.data)
+        serializer = ProfileSerializer(profile, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_avatar(request):
+    profile = request.user.profile
+    serializer = ProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_info(request):
     user = request.user
+    profile = user.profile
+    avatar = profile.avatar.url if profile.avatar else None
+    if avatar and request is not None:
+        avatar = request.build_absolute_uri(avatar)
     return Response({
         'username': user.username,
         'email': user.email,
+        'avatar': avatar,
     })
     
 
@@ -77,15 +93,20 @@ def get_user_posts(request, username):
     paginator.page_size = 5
     paginated_posts = paginator.paginate_queryset(posts, request)
 
-    serialized_posts = PostSerializer(paginated_posts, many=True)
+    serialized_posts = PostSerializer(paginated_posts, many=True, context={'request': request})
 
     # 🔥 Get bio from profile
-    bio = getattr(user.profile, 'bio', '')
+    profile = user.profile
+    bio = getattr(profile, 'bio', '')
+    avatar = profile.avatar.url if profile.avatar else None
+    if avatar:
+        avatar = request.build_absolute_uri(avatar)
 
     return paginator.get_paginated_response({
         'posts': serialized_posts.data,
         'bio': bio,
         'username': user.username,
+        'avatar': avatar,
     })
 
 class UserSerializer(ModelSerializer):
@@ -141,6 +162,12 @@ class CommentListCreateView(ListCreateAPIView):
     def perform_create(self, serializer):
         post = Post.objects.get(pk=self.kwargs['post_id'])
         serializer.save(author=self.request.user, post=post)
+
+
+class CommentDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
 
 @api_view(['POST'])
