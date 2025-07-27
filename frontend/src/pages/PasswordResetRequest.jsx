@@ -8,8 +8,12 @@ const PasswordResetRequest = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:9000/api/password-reset/', { email });
-      setMessage('If an account exists for that email, a reset link has been sent.');
+      const res = await axios.post('http://localhost:9000/api/password-reset/', { email });
+      if (res.data.reset_link) {
+        setMessage(`Reset link: ${res.data.reset_link}`);
+      } else {
+        setMessage('If an account exists for that email, a reset link has been sent.');
+      }
     } catch (err) {
       setMessage('Something went wrong.');
     }
