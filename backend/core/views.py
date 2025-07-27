@@ -19,6 +19,24 @@ from rest_framework import status
 from .models import Post, Comment, Like, Follow
 from .serializers import PostSerializer, ProfileSerializer, CommentSerializer
 from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+
+
+def send_verification_email(user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    link = f"{settings.FRONTEND_URL}/verify-email?uid={uid}&token={token}"
+    send_mail(
+        "Verify your email",
+        f"Click the link to verify your email: {link}",
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=True,
+    )
 
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -77,7 +95,8 @@ class UserSerializer(ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        user = User.objects.create_user(is_active=False, **validated_data)
+        send_verification_email(user)
         return user
 
 class RegisterView(generics.CreateAPIView):
@@ -186,5 +205,77 @@ def search(request):
     post_ser = PostSerializer(posts, many=True, context={'request': request})
     user_data = [{'username': u.username} for u in users]
     return Response({'posts': post_ser.data, 'users': user_data})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    uid = request.query_params.get('uid')
+    token = request.query_params.get('token')
+    if not uid or not token:
+        return Response({'detail': 'Invalid link.'}, status=400)
+    try:
+        uid = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return Response({'detail': 'Email verified.'})
+    return Response({'detail': 'Invalid or expired token.'}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({'email': 'This field is required.'}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Respond with success even if user does not exist
+        return Response({'detail': 'If an account exists, a password reset email has been sent.'})
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    link = f"{settings.FRONTEND_URL}/reset-password-confirm?uid={uid}&token={token}"
+    send_mail(
+        'Reset your password',
+        f'Click the link to reset your password: {link}',
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=True,
+    )
+    return Response({
+        'detail': 'If an account exists, a password reset email has been sent.',
+        'reset_link': link,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    uid = request.data.get('uid')
+    token = request.data.get('token')
+    password = request.data.get('password')
+
+    if not all([uid, token, password]):
+        return Response({'detail': 'Missing parameters.'}, status=400)
+
+    try:
+        uid = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({'detail': 'Invalid link.'}, status=400)
+
+    if default_token_generator.check_token(user, token):
+        user.set_password(password)
+        user.save()
+        return Response({'detail': 'Password reset successful.'})
+    return Response({'detail': 'Invalid or expired token.'}, status=400)
 
 

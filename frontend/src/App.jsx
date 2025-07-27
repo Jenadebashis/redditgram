@@ -8,6 +8,9 @@ import CreatePost from './pages/CreatePost';
 import UserPosts from './pages/UserPosts'; // ← NEW
 import Feed from './pages/Feed';
 import Search from './pages/Search';
+import PasswordResetRequest from './pages/PasswordResetRequest';
+import PasswordResetConfirm from './pages/PasswordResetConfirm';
+import VerifyEmail from './pages/VerifyEmail';
 
 function App() {
   return (
@@ -22,6 +25,9 @@ function App() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/search" element={<Search />} />
           <Route path="/user/:username" element={<UserPosts />} /> {/* ← NEW */}
+          <Route path="/password-reset" element={<PasswordResetRequest />} />
+          <Route path="/reset-password-confirm" element={<PasswordResetConfirm />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
       </div>
     </>

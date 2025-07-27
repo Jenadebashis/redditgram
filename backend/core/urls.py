@@ -11,6 +11,9 @@ from .views import (
     follow_user,
     feed_view,
     search,
+    verify_email,
+    password_reset_request,
+    password_reset_confirm,
 )
 
 urlpatterns = [
@@ -25,4 +28,7 @@ urlpatterns = [
     path('feed/', feed_view, name='feed'),
     path('search/', search, name='search'),
     path('profile/bio/', user_bio_view),
+    path('verify-email/', verify_email, name='verify-email'),
+    path('password-reset/', password_reset_request, name='password-reset'),
+    path('password-reset-confirm/', password_reset_confirm, name='password-reset-confirm'),
 ]
