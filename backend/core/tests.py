@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import Post
+from .models import Post, Comment
 
 
 class PostAPITestCase(TestCase):
@@ -109,3 +109,36 @@ class AvatarUploadTestCase(TestCase):
         response = self.client.put(url, {"avatar": img}, format="multipart")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("avatar_url", response.data)
+        
+class CommentAPITestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="cuser", password="pass")
+        self.post = Post.objects.create(author=self.user, caption="hello")
+        self.comment = Comment.objects.create(post=self.post, author=self.user, text="hi")
+
+    def test_update_comment_only_author(self):
+        url = reverse("comment-detail", args=[self.comment.id])
+        other = User.objects.create_user(username="other", password="pass")
+        self.client.force_authenticate(user=other)
+        resp = self.client.patch(url, {"text": "no"})
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_authenticate(user=self.user)
+        resp = self.client.patch(url, {"text": "updated"})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.comment.refresh_from_db()
+        self.assertEqual(self.comment.text, "updated")
+
+    def test_delete_comment_only_author(self):
+        url = reverse("comment-detail", args=[self.comment.id])
+        other = User.objects.create_user(username="other2", password="pass")
+        self.client.force_authenticate(user=other)
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Comment.objects.filter(id=self.comment.id).exists())
+
+        self.client.force_authenticate(user=self.user)
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
