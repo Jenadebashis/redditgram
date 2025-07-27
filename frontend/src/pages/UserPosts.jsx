@@ -13,6 +13,7 @@ const UserPosts = () => {
   const [error, setError] = useState('');
   const [nextPage, setNextPage] = useState(null);
   const [bio, setBio] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [editingBio, setEditingBio] = useState(false);
   const [following, setFollowing] = useState(false);
   const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
@@ -33,7 +34,8 @@ const UserPosts = () => {
     API.get(url)
       .then((res) => {
         setPosts((prev) => [...prev, ...res.data.results.posts]);
-        setBio(res.data.results.bio); // ✅ Extract bio
+        setBio(res.data.results.bio);
+        setAvatar(res.data.results.avatar);
         setNextPage(res.data.next);
         setLoading(false);
       })
@@ -78,7 +80,7 @@ const UserPosts = () => {
         >
           <div className="flex flex-col items-center text-center">
             <img
-              src={`/profile_images/${((username.charCodeAt(0) % 5) + 1)}.webp`}
+              src={avatar || `/profile_images/${((username.charCodeAt(0) % 5) + 1)}.webp`}
               alt={username}
               className="w-24 h-24 rounded-full object-cover border-4 border-indigo-500"
             />

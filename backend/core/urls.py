@@ -11,6 +11,7 @@ from .views import (
     follow_user,
     feed_view,
     search,
+    update_avatar,
 )
 
 urlpatterns = [
@@ -25,4 +26,5 @@ urlpatterns = [
     path('feed/', feed_view, name='feed'),
     path('search/', search, name='search'),
     path('profile/bio/', user_bio_view),
+    path('profile/avatar/', update_avatar),
 ]
