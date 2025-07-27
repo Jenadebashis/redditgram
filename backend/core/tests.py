@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APIClient
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from .models import Post
 
@@ -94,3 +95,17 @@ class RegisterViewTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["username"], "info_user")
+
+
+class AvatarUploadTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="ava", password="pass123")
+        self.client.force_authenticate(user=self.user)
+
+    def test_update_avatar(self):
+        url = reverse("update_avatar")
+        img = SimpleUploadedFile("avatar.png", b"dummy", content_type="image/png")
+        response = self.client.put(url, {"avatar": img}, format="multipart")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("avatar_url", response.data)

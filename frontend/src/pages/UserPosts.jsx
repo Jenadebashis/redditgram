@@ -13,6 +13,8 @@ const UserPosts = () => {
   const [error, setError] = useState('');
   const [nextPage, setNextPage] = useState(null);
   const [bio, setBio] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [uploadMsg, setUploadMsg] = useState('');
   const [editingBio, setEditingBio] = useState(false);
   const [following, setFollowing] = useState(false);
   const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
@@ -33,7 +35,8 @@ const UserPosts = () => {
     API.get(url)
       .then((res) => {
         setPosts((prev) => [...prev, ...res.data.results.posts]);
-        setBio(res.data.results.bio); // ✅ Extract bio
+        setBio(res.data.results.bio);
+        setAvatar(res.data.results.avatar);
         setNextPage(res.data.next);
         setLoading(false);
       })
@@ -66,6 +69,24 @@ const UserPosts = () => {
     }
   };
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('avatar', file);
+    try {
+      setUploadMsg('Uploading...');
+      const res = await API.put('/profile/avatar/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setAvatar(res.data.avatar_url);
+      setUploadMsg('Avatar updated');
+    } catch (err) {
+      console.error(err);
+      setUploadMsg('Upload failed');
+    }
+  };
+
   return (
     <div className="flex justify-center px-4">
       <div className="w-full max-w-5xl flex flex-col md:flex-row gap-6">
@@ -78,7 +99,7 @@ const UserPosts = () => {
         >
           <div className="flex flex-col items-center text-center">
             <img
-              src={`/profile_images/${((username.charCodeAt(0) % 5) + 1)}.webp`}
+              src={avatar || `/profile_images/${((username.charCodeAt(0) % 5) + 1)}.webp`}
               alt={username}
               className="w-24 h-24 rounded-full object-cover border-4 border-indigo-500"
             />
@@ -107,6 +128,11 @@ const UserPosts = () => {
                     initialBio={bio}
                   />
                 )}
+                <label className="mt-2 text-sm text-indigo-500 hover:underline cursor-pointer">
+                  Change Avatar
+                  <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+                </label>
+                {uploadMsg && <p className="text-sm mt-1">{uploadMsg}</p>}
               </>
             )}
             <p className="mt-3 text-sm text-gray-700">
