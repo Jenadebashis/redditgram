@@ -7,13 +7,14 @@ from .views import (
     PostListCreateView,
     PostDetailView,
     CommentListCreateView,
+    CommentDetailView,
     like_post,
     follow_user,
     feed_view,
     search,
     verify_email,
     password_reset_request,
-    password_reset_confirm,
+    update_avatar,
 )
 
 urlpatterns = [
@@ -22,6 +23,7 @@ urlpatterns = [
     path('posts/', PostListCreateView.as_view(), name='posts'),
     path('posts/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
     path('posts/<int:post_id>/comments/', CommentListCreateView.as_view(), name='comments'),
+    path('comments/<int:pk>/', CommentDetailView.as_view(), name='comment-detail'),
     path('posts/<int:post_id>/like/', like_post, name='like-post'),
     path('posts/user/<str:username>/', get_user_posts, name='user-posts'),
     path('follow/<str:username>/', follow_user, name='follow-user'),
@@ -31,4 +33,5 @@ urlpatterns = [
     path('verify-email/', verify_email, name='verify-email'),
     path('password-reset/', password_reset_request, name='password-reset'),
     path('password-reset-confirm/', password_reset_confirm, name='password-reset-confirm'),
+    path('profile/avatar/', update_avatar),
 ]
