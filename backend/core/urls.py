@@ -31,8 +31,8 @@ urlpatterns = [
     path('feed/', feed_view, name='feed'),
     path('search/', search, name='search'),
     path('profile/bio/', user_bio_view),
+    path('profile/avatar/', update_avatar, name='update_avatar'),
     path('verify-email/', verify_email, name='verify-email'),
     path('password-reset/', password_reset_request, name='password-reset'),
     path('password-reset-confirm/', password_reset_confirm, name='password-reset-confirm'),
-    path('profile/avatar/', update_avatar),
 ]
