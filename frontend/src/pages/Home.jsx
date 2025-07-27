@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PostList from '../components/PostList';
@@ -12,7 +13,7 @@ function Home() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <PostList />
+      <PostList initialUrl="/posts/" />
     </div>
   );
 }

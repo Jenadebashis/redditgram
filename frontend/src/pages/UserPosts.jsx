@@ -14,6 +14,7 @@ const UserPosts = () => {
   const [nextPage, setNextPage] = useState(null);
   const [bio, setBio] = useState('');
   const [editingBio, setEditingBio] = useState(false);
+  const [following, setFollowing] = useState(false);
   const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
   const isOwner = loggedInUsername === username;
 
@@ -46,12 +47,22 @@ const UserPosts = () => {
   useEffect(() => {
     setPosts([]);
     setLoading(true);
+    API.get(`/follow/${username}/`).then(res => setFollowing(res.data.following)).catch(() => setFollowing(false));
     fetchUserPosts(); // Initial fetch on username change
   }, [username]);
 
   const handleLoadMore = () => {
     if (nextPage) {
       fetchUserPosts(nextPage);
+    }
+  };
+
+  const toggleFollow = async () => {
+    try {
+      const res = await API.post(`/follow/${username}/`);
+      setFollowing(res.data.following);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -75,6 +86,11 @@ const UserPosts = () => {
             <p className="text-sm text-gray-600 mt-2">
               {bio || "This user hasn’t written a bio yet."}
             </p>
+            {!isOwner && (
+              <button onClick={toggleFollow} className="mt-2 text-sm text-indigo-500 hover:underline">
+                {following ? 'Unfollow' : 'Follow'}
+              </button>
+            )}
             {isOwner && (
               <>
                 {!editingBio && (
