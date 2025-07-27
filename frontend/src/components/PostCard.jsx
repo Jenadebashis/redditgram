@@ -81,6 +81,8 @@ export const PostCard = ({ post }) => {
     }
   };
 
+  console.log('the comments are: ', {comments});
+
   return (
     <motion.div
       key={post.id}
@@ -126,7 +128,7 @@ export const PostCard = ({ post }) => {
 
       {showComments && (
         <div className="mt-3 bg-white/10 p-3 rounded">
-          {comments.map((c) => (
+          {comments?.results?.map?.((c) => (
             <p key={c.id} className="text-sm mb-1">
               <strong>@{c.author_username}</strong>: {c.text}
             </p>
