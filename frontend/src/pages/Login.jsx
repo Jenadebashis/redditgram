@@ -51,6 +51,9 @@ const Login = () => {
       >
         Login
       </button>
+      <div>
+        <a href="/password-reset" className="text-sm text-indigo-600 hover:underline">Forgot password?</a>
+      </div>
     </form>
   );
 };
