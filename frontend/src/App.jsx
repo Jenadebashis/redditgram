@@ -8,6 +8,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreatePost from './pages/CreatePost';
 import UserPosts from './pages/UserPosts'; // ← NEW
+import TagPosts from './pages/TagPosts';
 import Feed from './pages/Feed';
 import Search from './pages/Search';
 import PasswordResetRequest from './pages/PasswordResetRequest';
@@ -48,6 +49,7 @@ function App() {
             <Route path="/create" element={<CreatePost />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/tag/:name" element={<TagPosts />} />
             <Route path="/user/:username" element={<UserPosts />} />
             <Route path="/password-reset" element={<PasswordResetRequest />} />
             <Route path="/reset-password-confirm" element={<PasswordResetConfirm />} />
