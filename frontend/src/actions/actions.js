@@ -3,6 +3,7 @@ import {
   UPDATE_BIO,
   UPDATE_BIO_SUCCESS,
   UPDATE_BIO_FAILURE,
+  CLEAR_BIO_STATUS,
 } from "./actionTypes";
 
 export const updateBio = (payload) => ({
@@ -16,4 +17,8 @@ export const updateBioSuccess = (bio) => ({
 export const updateBioFailure = (error) => ({
   type: UPDATE_BIO_FAILURE,
   payload: error, // Error message if the update fails
+});
+
+export const clearBioStatus = () => ({
+  type: CLEAR_BIO_STATUS,
 });

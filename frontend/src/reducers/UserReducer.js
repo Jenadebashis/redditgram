@@ -2,6 +2,7 @@
 import {
   UPDATE_BIO_SUCCESS,
   UPDATE_BIO_FAILURE,
+  CLEAR_BIO_STATUS,
 } from "../actions/actionTypes";
 
 const initialState = {
@@ -17,6 +18,9 @@ const userReducer = (state = initialState, action) => {
 
     case UPDATE_BIO_FAILURE:
       return { ...state, error: action.payload, bioUpdateStatus: "error" };
+
+    case CLEAR_BIO_STATUS:
+      return { ...state, bioUpdateStatus: null };
 
     default:
       return state;
