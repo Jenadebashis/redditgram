@@ -101,5 +101,5 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'user', 'from_user', 'from_username', 'notification_type', 'post', 'created_at']
+        fields = ['id', 'user', 'from_user', 'from_username', 'notification_type', 'post', 'created_at', 'is_read']
         read_only_fields = ['user', 'from_user', 'created_at']

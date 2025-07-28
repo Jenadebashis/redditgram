@@ -426,6 +426,21 @@ class NotificationListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+        qs = Notification.objects.filter(user=self.request.user)
+        if self.request.query_params.get('unread') == 'true':
+            qs = qs.filter(is_read=False)
+        if self.request.query_params.get('unread_first') == 'true':
+            qs = qs.order_by('is_read', '-created_at')
+        else:
+            qs = qs.order_by('-created_at')
+        return qs
+
+
+class NotificationDetailView(generics.UpdateAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)
 
 
