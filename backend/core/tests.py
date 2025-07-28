@@ -27,6 +27,16 @@ class PostAPITestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Post.objects.filter(caption="hello").exists())
 
+    def test_create_post_with_tags(self):
+        url = reverse("posts")
+        self.client.force_authenticate(user=self.user)
+        data = {"caption": "tagged", "tag_names": ["t1", "t2"]}
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(id=response.data["id"])
+        self.assertEqual(post.tags.count(), 2)
+        self.assertTrue(Tag.objects.filter(name="t1").exists())
+
     def test_retrieve_post_authenticated(self):
         post = Post.objects.create(author=self.user, caption="hello")
         url = reverse("post-detail", args=[post.id])
@@ -158,8 +168,8 @@ class AdditionalViewsTestCase(TestCase):
         Like.objects.create(post=self.post2, user=self.user2)
 
         # tags
-        tag1 = Tag.objects.create(name="django")
-        tag1.posts.add(self.post1)
+        self.tag1 = Tag.objects.create(name="django")
+        self.tag1.posts.add(self.post1)
         Tag.objects.create(name="rest")
 
         # follow
@@ -184,6 +194,13 @@ class AdditionalViewsTestCase(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         resp = self.client.get(reverse("tag-popular"))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_get_posts_by_tag(self):
+        url = reverse("tag-posts", args=[self.tag1.name])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data["results"]), 1)
+        self.assertEqual(resp.data["results"][0]["id"], self.post1.id)
 
     def test_suggested_users(self):
         resp = self.client.get(reverse("user-suggested"))

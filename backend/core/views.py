@@ -136,7 +136,7 @@ class TrendingPostsView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        qs = Post.objects.all()
+        qs = Post.objects.all().prefetch_related("tags")
         if self.request.query_params.get("sort") == "trending":
             qs = qs.annotate(like_count=Count("likes")).order_by("-like_count", "-created_at")
         else:
@@ -145,6 +145,15 @@ class TrendingPostsView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class TagPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        name = self.kwargs['name']
+        return Post.objects.filter(tags__name=name).order_by('-created_at').prefetch_related('tags')
 
 
 class IsAuthorOrReadOnly(BasePermission):
