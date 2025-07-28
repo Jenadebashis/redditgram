@@ -22,6 +22,7 @@ from .views import (
     BookmarkListView,
     UserStatsView,
     NotificationListView,
+    NotificationDetailView,
 )
 
 urlpatterns = [
@@ -42,6 +43,7 @@ urlpatterns = [
     path('bookmarks/', BookmarkListView.as_view(), name='bookmarks'),
     path('profile/stats/', UserStatsView.as_view(), name='user-stats'),
     path('notifications/', NotificationListView.as_view(), name='notifications'),
+    path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification-detail'),
     path('profile/bio/', user_bio_view),
     path('profile/avatar/', update_avatar, name='update_avatar'),
     path('verify-email/', verify_email, name='verify-email'),

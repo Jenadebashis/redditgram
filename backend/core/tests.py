@@ -204,6 +204,23 @@ class AdditionalViewsTestCase(TestCase):
         resp = self.client.get(reverse("notifications"))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+    def test_mark_notification_read(self):
+        note = Notification.objects.filter(user=self.user).first()
+        url = reverse("notification-detail", args=[note.id])
+        resp = self.client.patch(url, {"is_read": True})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        note.refresh_from_db()
+        self.assertTrue(note.is_read)
+
+    def test_notification_list_unread_filter(self):
+        Notification.objects.create(user=self.user, from_user=self.user2, notification_type="like", post=self.post1)
+        note = Notification.objects.create(user=self.user, from_user=self.user2, notification_type="comment", post=self.post2)
+        # mark one as read
+        self.client.patch(reverse("notification-detail", args=[note.id]), {"is_read": True})
+        resp = self.client.get(reverse("notifications") + "?unread=true")
+        ids = [n["id"] for n in resp.data.get("results", resp.data)]
+        self.assertNotIn(note.id, ids)
+
     def test_follow_creates_notification(self):
         user3 = User.objects.create_user(username="third", password="pass")
         url = reverse("follow-user", args=[user3.username])
