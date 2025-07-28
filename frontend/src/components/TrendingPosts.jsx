@@ -25,19 +25,19 @@ const TrendingPosts = () => {
       uniqueKey="trending-posts"
     >
       <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
-        <ul className="space-y-1">
+        <ul className="space-y-1 text-gray-700 dark:text-gray-200">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <li
                 key={idx}
-                className="h-4 bg-gray-300 rounded animate-pulse"
+                className="h-4 bg-gray-300 dark:bg-gray-700 rounded animate-pulse"
               ></li>
             ))
           : posts.map((p) => (
               <li key={p.id}>
                 <Link
                   to={`/posts/${p.id}`}
-                  className="text-sm text-blue-600 hover:underline"
+                  className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   {p.caption}
                 </Link>

@@ -7,7 +7,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const LeftSidebar = ({ mobileOpen, setMobileOpen }) => {
   const content = (
-    <div className="p-4 space-y-6">
+    <div className="p-4 space-y-6 text-gray-700 dark:text-gray-200">
       <TrendingPosts />
       <TagList />
       <SuggestedUsers />
@@ -16,7 +16,7 @@ const LeftSidebar = ({ mobileOpen, setMobileOpen }) => {
 
   return (
     <>
-      <aside className="hidden lg:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+      <aside className="hidden lg:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto text-gray-700 dark:text-gray-200">
         {content}
       </aside>
       <AnimatePresence>
@@ -30,7 +30,7 @@ const LeftSidebar = ({ mobileOpen, setMobileOpen }) => {
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto"
+              className="lg:hidden fixed inset-0 bg-white dark:bg-gray-900 z-50 overflow-y-auto text-gray-700 dark:text-gray-200"
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "-100%", opacity: 0 }}
