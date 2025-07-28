@@ -1,5 +1,9 @@
 // actions.js
-import { UPDATE_BIO } from "./actionTypes";
+import {
+  UPDATE_BIO,
+  UPDATE_BIO_SUCCESS,
+  UPDATE_BIO_FAILURE,
+} from "./actionTypes";
 
 export const updateBio = (payload) => ({
   type: UPDATE_BIO,
