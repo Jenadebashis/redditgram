@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { BellIcon } from "@heroicons/react/24/outline";
 import API from "../api";
 import CollapsibleSection from "./CollapsibleSection";
 
@@ -42,8 +43,16 @@ const NotificationsPanel = () => {
   };
 
   return (
-    <CollapsibleSection header="Notifications" uniqueKey="notifications">
-      <ul className="space-y-1">
+    <CollapsibleSection
+      header={(
+        <>
+          <BellIcon className="w-4 h-4 mr-1 inline" /> Notifications
+        </>
+      )}
+      uniqueKey="notifications"
+    >
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <ul className="space-y-1">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <li
@@ -70,7 +79,8 @@ const NotificationsPanel = () => {
                 {renderMessage(n)}
               </li>
             ))}
-      </ul>
+        </ul>
+      </div>
     </CollapsibleSection>
   );
 };

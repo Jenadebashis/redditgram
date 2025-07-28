@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
 import { Link } from "react-router-dom";
+import { TagIcon } from "@heroicons/react/24/outline";
 import CollapsibleSection from "./CollapsibleSection";
 
 const TagList = () => {
@@ -15,8 +16,16 @@ const TagList = () => {
   }, []);
 
   return (
-    <CollapsibleSection header="Trending Tags" uniqueKey="trending-tags">
-      <div className="flex flex-wrap gap-2">
+    <CollapsibleSection
+      header={(
+        <>
+          <TagIcon className="w-4 h-4 mr-1 inline" /> Trending Tags
+        </>
+      )}
+      uniqueKey="trending-tags"
+    >
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <div className="flex flex-wrap gap-2">
         {loading
           ? Array.from({ length: 5 }).map((_, idx) => (
               <div
@@ -33,6 +42,7 @@ const TagList = () => {
                 #{tag.name || tag}
               </Link>
             ))}
+        </div>
       </div>
     </CollapsibleSection>
   );

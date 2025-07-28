@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BookmarkIcon } from "@heroicons/react/24/outline";
 import API from "../api";
 import CollapsibleSection from "./CollapsibleSection";
 
@@ -21,8 +22,16 @@ const SavedPosts = () => {
   };
 
   return (
-    <CollapsibleSection header="Saved Posts" uniqueKey="saved-posts">
-      <ul className="space-y-1">
+    <CollapsibleSection
+      header={(
+        <>
+          <BookmarkIcon className="w-4 h-4 mr-1 inline" /> Saved Posts
+        </>
+      )}
+      uniqueKey="saved-posts"
+    >
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <ul className="space-y-1">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <li
@@ -46,7 +55,8 @@ const SavedPosts = () => {
                 </button>
               </li>
             ))}
-      </ul>
+        </ul>
+      </div>
     </CollapsibleSection>
   );
 };

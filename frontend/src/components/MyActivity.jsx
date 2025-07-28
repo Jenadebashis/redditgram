@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import { ChartBarIcon } from "@heroicons/react/24/outline";
 import CollapsibleSection from "./CollapsibleSection";
 
 const MyActivity = () => {
@@ -14,8 +15,16 @@ const MyActivity = () => {
   }, []);
 
   return (
-    <CollapsibleSection header="My Activity" uniqueKey="my-activity">
-      <ul className="space-y-1">
+    <CollapsibleSection
+      header={(
+        <>
+          <ChartBarIcon className="w-4 h-4 mr-1 inline" /> My Activity
+        </>
+      )}
+      uniqueKey="my-activity"
+    >
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <ul className="space-y-1">
         {loading ? (
           Array.from({ length: 4 }).map((_, idx) => (
             <li
@@ -33,7 +42,8 @@ const MyActivity = () => {
             </>
           )
         )}
-      </ul>
+        </ul>
+      </div>
     </CollapsibleSection>
   );
 };
