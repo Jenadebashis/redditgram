@@ -234,6 +234,34 @@ class AdditionalViewsTestCase(TestCase):
             ).exists()
         )
 
+
+class FollowListsTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(username="u1", password="pass")
+        self.user2 = User.objects.create_user(username="u2", password="pass")
+        self.user3 = User.objects.create_user(username="u3", password="pass")
+        Follow.objects.create(follower=self.user2, following=self.user1)
+        Follow.objects.create(follower=self.user3, following=self.user1)
+        Follow.objects.create(follower=self.user1, following=self.user2)
+
+    def test_list_followers(self):
+        url = reverse("user-followers", args=[self.user1.username])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(set(resp.data["followers"]), {"u2", "u3"})
+
+    def test_list_following(self):
+        url = reverse("user-following", args=[self.user1.username])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data["following"], ["u2"]) 
+
+    def test_list_invalid_user(self):
+        url = reverse("user-followers", args=["nope"])
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
 class SignalNotificationTestCase(TestCase):
     def setUp(self):
         self.user1 = User.objects.create_user(username="user1", password="pass")

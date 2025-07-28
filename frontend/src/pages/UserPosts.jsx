@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import API from '../api';
@@ -18,6 +18,8 @@ const UserPosts = () => {
   const [uploadMsg, setUploadMsg] = useState('');
   const [editingBio, setEditingBio] = useState(false);
   const [following, setFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
   const isOwner = loggedInUsername === username;
 
@@ -49,6 +51,8 @@ const UserPosts = () => {
     setPosts([]);
     setLoading(true);
     API.get(`/follow/${username}/`).then(res => setFollowing(res.data.following)).catch(() => setFollowing(false));
+    API.get(`/users/${username}/followers/`).then(res => setFollowerCount(res.data.followers.length)).catch(() => setFollowerCount(0));
+    API.get(`/users/${username}/following/`).then(res => setFollowingCount(res.data.following.length)).catch(() => setFollowingCount(0));
     fetchUserPosts(); // Initial fetch on username change
   }, [username]);
 
@@ -137,6 +141,14 @@ const UserPosts = () => {
             <p className="mt-3 text-sm text-gray-700">
               Total Posts: <span className="font-semibold">{posts.length}</span>
             </p>
+            <div className="mt-2 flex space-x-4 text-sm">
+              <Link to={`/user/${username}/followers`} className="text-indigo-500 hover:underline">
+                Followers: {followerCount}
+              </Link>
+              <Link to={`/user/${username}/following`} className="text-indigo-500 hover:underline">
+                Following: {followingCount}
+              </Link>
+            </div>
           </div>
         </motion.div>
 

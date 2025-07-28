@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreatePost from './pages/CreatePost';
 import UserPosts from './pages/UserPosts'; // ← NEW
+import FollowersList from './pages/FollowersList';
+import FollowingList from './pages/FollowingList';
 import TagPosts from './pages/TagPosts';
 import Feed from './pages/Feed';
 import Search from './pages/Search';
@@ -51,6 +53,8 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/tag/:name" element={<TagPosts />} />
             <Route path="/user/:username" element={<UserPosts />} />
+            <Route path="/user/:username/followers" element={<FollowersList />} />
+            <Route path="/user/:username/following" element={<FollowingList />} />
             <Route path="/password-reset" element={<PasswordResetRequest />} />
             <Route path="/reset-password-confirm" element={<PasswordResetConfirm />} />
             <Route path="/verify-email" element={<VerifyEmail />} />

@@ -232,6 +232,36 @@ def follow_user(request, username):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
+def list_followers(request, username):
+    """Return a list of usernames following the given user."""
+    try:
+        target = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    follower_usernames = list(
+        target.followers.values_list('follower__username', flat=True)
+    )
+    return Response({'followers': follower_usernames})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_following(request, username):
+    """Return a list of usernames that the user is following."""
+    try:
+        target = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    following_usernames = list(
+        target.following.values_list('following__username', flat=True)
+    )
+    return Response({'following': following_usernames})
+
+
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def feed_view(request):
     followed = request.user.following.values_list('following', flat=True)
