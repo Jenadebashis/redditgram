@@ -62,11 +62,6 @@ def send_comment_notification(sender, instance, created, **kwargs):
 def send_follow_notification(sender, instance, created, **kwargs):
     if not created:
         return
-    Notification.objects.create(
-        user=instance.following,
-        from_user=instance.follower,
-        notification_type="follow",
-    )
     channel_layer = get_channel_layer()
     data = {
         'type': 'notify',
