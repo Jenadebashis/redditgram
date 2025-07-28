@@ -27,6 +27,8 @@ from .views import (
     UserStatsView,
     NotificationListView,
     NotificationDetailView,
+    mark_all_notifications_read,
+    clear_notifications,
 )
 
 urlpatterns = [
@@ -51,6 +53,8 @@ urlpatterns = [
     path('bookmarks/<int:pk>/', BookmarkDetailView.as_view(), name='bookmark-detail'),
     path('profile/stats/', UserStatsView.as_view(), name='user-stats'),
     path('notifications/', NotificationListView.as_view(), name='notifications'),
+    path('notifications/mark_all_read/', mark_all_notifications_read, name='notifications-mark-all-read'),
+    path('notifications/clear_all/', clear_notifications, name='notifications-clear-all'),
     path('notifications/<int:pk>/', NotificationDetailView.as_view(), name='notification-detail'),
     path('profile/bio/', user_bio_view),
     path('profile/avatar/', update_avatar, name='update_avatar'),

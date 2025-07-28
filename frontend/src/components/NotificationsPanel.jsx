@@ -12,16 +12,24 @@ const NotificationsPanel = () => {
       .then((res) => {
         const list = res.data.results || res.data;
         setNotes(list);
-        list.forEach((n) => {
-          if (!n.is_read) {
-            API.patch(`/notifications/${n.id}/`, { is_read: true })
-              .catch((err) => console.error(err));
-          }
-        });
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
+
+  const markAllRead = () => {
+    API.post("/notifications/mark_all_read/")
+      .then(() =>
+        setNotes((prev) => prev.map((n) => ({ ...n, is_read: true })))
+      )
+      .catch((err) => console.error(err));
+  };
+
+  const clearAll = () => {
+    API.delete("/notifications/clear_all/")
+      .then(() => setNotes([]))
+      .catch((err) => console.error(err));
+  };
 
   const renderMessage = (n) => {
     if (!n) return "";
@@ -52,6 +60,14 @@ const NotificationsPanel = () => {
       uniqueKey="notifications"
     >
       <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <div className="text-right mb-2 space-x-2 text-sm">
+          <button onClick={markAllRead} className="hover:underline">
+            Mark all as read
+          </button>
+          <button onClick={clearAll} className="hover:underline text-red-500">
+            Clear all
+          </button>
+        </div>
         <ul className="space-y-1 text-gray-700 dark:text-gray-200">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
