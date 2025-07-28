@@ -47,3 +47,20 @@ The frontend reads the backend URLs from the environment variables
 
 The application will be available at `http://localhost:5173` by default. Build a
 production bundle with `npm run build` and preview it locally using `npm run preview`.
+
+## Running tests
+
+Run backend tests from the `backend` directory:
+
+```bash
+source env/bin/activate
+cd backend
+python manage.py test
+```
+
+Run frontend tests using `npm`:
+
+```bash
+cd frontend
+npm test
+```

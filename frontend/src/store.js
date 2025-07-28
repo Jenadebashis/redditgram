@@ -1,6 +1,6 @@
 // store.js
 import { createStore, applyMiddleware, combineReducers } from "redux";
-import thunk from "redux-thunk";
+import { thunk } from "redux-thunk";
 import { apiMiddleware } from "./apiMiddleware";
 import userReducer from "./reducers/UserReducer";
 
