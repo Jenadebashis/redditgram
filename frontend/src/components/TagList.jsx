@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
 import { Link } from "react-router-dom";
+import CollapsibleSection from "./CollapsibleSection";
 
 const TagList = () => {
   const [tags, setTags] = useState([]);
@@ -12,8 +13,7 @@ const TagList = () => {
   }, []);
 
   return (
-    <div className="mb-6">
-      <h2 className="font-semibold mb-2">Trending Tags</h2>
+    <CollapsibleSection header="Trending Tags" uniqueKey="trending-tags">
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
           <Link
@@ -25,7 +25,7 @@ const TagList = () => {
           </Link>
         ))}
       </div>
-    </div>
+    </CollapsibleSection>
   );
 };
 
