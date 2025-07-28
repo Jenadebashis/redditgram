@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateBio } from "../actions/actions";
+import { updateBio, clearBioStatus } from "../actions/actions";
 
 const EditBio = ({ initialBio = "" }) => {
   const [bio, setBio] = useState(initialBio);
@@ -8,7 +8,7 @@ const EditBio = ({ initialBio = "" }) => {
 
   const dispatch = useDispatch();
 
-  let updateStatus = useSelector(state => state.user.bioUpdateStatus);
+  const updateStatus = useSelector(state => state.user.bioUpdateStatus);
 
   const defaultBio = "Tell us about yourself!";
 
@@ -20,12 +20,12 @@ const EditBio = ({ initialBio = "" }) => {
   useEffect(() => {
     if (updateStatus === "success") {
       setMsg("Bio updated successfully ✅");
-      updateStatus = null; // Reset status after showing message
+      dispatch(clearBioStatus());
     } else if (updateStatus === "error") {
       setMsg("Failed to update bio ❌");
-      updateStatus = null; // Reset status after showing message
+      dispatch(clearBioStatus());
     }
-  }, [updateStatus]);
+  }, [updateStatus, dispatch]);
 
   return (
     <div className="p-4 bg-white rounded shadow">
