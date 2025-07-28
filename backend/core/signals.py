@@ -2,7 +2,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from .models import Profile, Like, Comment, Notification, Follow
+from .models import Profile, Like, Comment, Follow, Notification
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -57,10 +57,16 @@ def send_comment_notification(sender, instance, created, **kwargs):
     )
 
 
+
 @receiver(post_save, sender=Follow)
 def send_follow_notification(sender, instance, created, **kwargs):
     if not created:
         return
+    Notification.objects.create(
+        user=instance.following,
+        from_user=instance.follower,
+        notification_type="follow",
+    )
     channel_layer = get_channel_layer()
     data = {
         'type': 'notify',

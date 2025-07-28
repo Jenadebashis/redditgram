@@ -204,6 +204,18 @@ class AdditionalViewsTestCase(TestCase):
         resp = self.client.get(reverse("notifications"))
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
+    def test_follow_creates_notification(self):
+        user3 = User.objects.create_user(username="third", password="pass")
+        url = reverse("follow-user", args=[user3.username])
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            Notification.objects.filter(
+                user=user3,
+                from_user=self.user,
+                notification_type="follow",
+            ).exists()
+        )
 
 class SignalNotificationTestCase(TestCase):
     def setUp(self):
