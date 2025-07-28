@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import MyActivity from "./MyActivity";
 import SavedPosts from "./SavedPosts";
 import NotificationsPanel from "./NotificationsPanel";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const RightSidebar = ({ mobileOpen, setMobileOpen }) => {
   const content = (
@@ -16,7 +15,7 @@ const RightSidebar = ({ mobileOpen, setMobileOpen }) => {
 
   return (
     <>
-      <aside className="hidden lg:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto text-gray-700 dark:text-gray-200">
+      <aside className="hidden lg:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto text-gray-700 dark:text-gray-200 bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 sidebar-scrollbar">
         {content}
       </aside>
       <AnimatePresence>
@@ -30,7 +29,7 @@ const RightSidebar = ({ mobileOpen, setMobileOpen }) => {
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              className="lg:hidden fixed inset-0 bg-white dark:bg-gray-900 z-50 overflow-y-auto text-gray-700 dark:text-gray-200"
+              className="lg:hidden fixed inset-0 bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 z-50 overflow-y-auto text-gray-700 dark:text-gray-200 sidebar-scrollbar"
               initial={{ x: "100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}

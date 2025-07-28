@@ -19,12 +19,12 @@ const TagList = () => {
     <CollapsibleSection
       header={(
         <>
-          <TagIcon className="w-4 h-4 mr-1 inline" /> Trending Tags
+          <TagIcon className="w-4 h-4 mr-1 text-indigo-600 bg-indigo-100 rounded-full p-1" /> Trending Tags
         </>
       )}
       uniqueKey="trending-tags"
     >
-      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md">
         <div className="flex flex-wrap gap-2 text-gray-700 dark:text-gray-200">
         {loading
           ? Array.from({ length: 5 }).map((_, idx) => (
@@ -37,7 +37,7 @@ const TagList = () => {
               <Link
                 key={tag.id || tag}
                 to={`/tag/${tag.name || tag}`}
-                className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded"
+                className="text-xs px-2 py-1 bg-gray-200 dark:bg-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
               >
                 #{tag.name || tag}
               </Link>
