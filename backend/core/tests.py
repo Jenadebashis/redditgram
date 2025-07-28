@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import Post, Comment
+from .models import Post, Comment, Tag, Bookmark, Notification, Like, Follow
 
 
 class PostAPITestCase(TestCase):
@@ -142,3 +142,64 @@ class CommentAPITestCase(TestCase):
         resp = self.client.delete(url)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Comment.objects.filter(id=self.comment.id).exists())
+
+
+class AdditionalViewsTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="main", password="pass")
+        self.user2 = User.objects.create_user(username="other", password="pass")
+        self.client.force_authenticate(user=self.user)
+
+        # create posts
+        self.post1 = Post.objects.create(author=self.user, caption="p1")
+        self.post2 = Post.objects.create(author=self.user2, caption="p2")
+        Like.objects.create(post=self.post2, user=self.user)
+        Like.objects.create(post=self.post2, user=self.user2)
+
+        # tags
+        tag1 = Tag.objects.create(name="django")
+        tag1.posts.add(self.post1)
+        Tag.objects.create(name="rest")
+
+        # follow
+        Follow.objects.create(follower=self.user, following=self.user2)
+
+        # bookmark
+        Bookmark.objects.create(user=self.user, post=self.post2)
+
+        # notification
+        Notification.objects.create(user=self.user, from_user=self.user2, notification_type="follow")
+
+    def test_trending_posts(self):
+        url = reverse("posts") + "?sort=trending"
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(resp.data["results"]), 1)
+        # first post should be post2 with more likes
+        self.assertEqual(resp.data["results"][0]["id"], self.post2.id)
+
+    def test_tag_endpoints(self):
+        resp = self.client.get(reverse("tag-list"))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        resp = self.client.get(reverse("tag-popular"))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_suggested_users(self):
+        resp = self.client.get(reverse("user-suggested"))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_bookmark_list(self):
+        resp = self.client.get(reverse("bookmarks"))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        resp = self.client.post(reverse("bookmarks"), {"post": self.post1.id})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+    def test_user_stats(self):
+        resp = self.client.get(reverse("user-stats"))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIn("post_count", resp.data)
+
+    def test_notifications(self):
+        resp = self.client.get(reverse("notifications"))
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
