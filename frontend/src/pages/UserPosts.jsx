@@ -29,9 +29,6 @@ const UserPosts = () => {
     }
   }, [updatedBio]);
 
-  console.log(`Fetching posts for user: ${username} and bio: ${bio} and isOwner: ${isOwner} and loggedInUsername: ${loggedInUsername}`);
-
-
   const fetchUserPosts = (url = `/posts/user/${username}/`) => {
     API.get(url)
       .then((res) => {
