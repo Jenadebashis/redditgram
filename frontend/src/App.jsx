@@ -10,6 +10,7 @@ import CreatePost from './pages/CreatePost';
 import UserPosts from './pages/UserPosts'; // ← NEW
 import FollowersList from './pages/FollowersList';
 import FollowingList from './pages/FollowingList';
+import TagPosts from './pages/TagPosts';
 import Feed from './pages/Feed';
 import Search from './pages/Search';
 import PasswordResetRequest from './pages/PasswordResetRequest';
@@ -50,6 +51,7 @@ function App() {
             <Route path="/create" element={<CreatePost />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/tag/:name" element={<TagPosts />} />
             <Route path="/user/:username" element={<UserPosts />} />
             <Route path="/user/:username/followers" element={<FollowersList />} />
             <Route path="/user/:username/following" element={<FollowingList />} />

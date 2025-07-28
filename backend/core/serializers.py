@@ -7,6 +7,10 @@ class PostSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     author_avatar = serializers.SerializerMethodField()
+    tags = TagSerializer(many=True, read_only=True)
+    tag_names = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False
+    )
     class Meta:
         model = Post
         fields = [
@@ -19,6 +23,8 @@ class PostSerializer(serializers.ModelSerializer):
             'comment_count',
             'like_count',
             'is_liked',
+            'tags',
+            'tag_names',
         ]
         read_only_fields = ['author']
 
@@ -41,6 +47,17 @@ class PostSerializer(serializers.ModelSerializer):
             url = avatar.url
             return request.build_absolute_uri(url) if request else url
         return None
+
+    def create(self, validated_data):
+        tag_names = validated_data.pop('tag_names', [])
+        post = super().create(validated_data)
+        tags = []
+        for name in tag_names:
+            tag, _ = Tag.objects.get_or_create(name=name)
+            tags.append(tag)
+        if tags:
+            post.tags.set(tags)
+        return post
 
 class ProfileSerializer(serializers.ModelSerializer):
     avatar_url = serializers.SerializerMethodField(read_only=True)
