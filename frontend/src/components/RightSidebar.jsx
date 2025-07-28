@@ -2,6 +2,7 @@ import React from "react";
 import MyActivity from "./MyActivity";
 import SavedPosts from "./SavedPosts";
 import NotificationsPanel from "./NotificationsPanel";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const RightSidebar = ({ mobileOpen, setMobileOpen }) => {
   const content = (
@@ -18,12 +19,12 @@ const RightSidebar = ({ mobileOpen, setMobileOpen }) => {
         {content}
       </aside>
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto">
+        <div className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto relative">
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-2 text-right block ml-auto mr-2 mt-2"
+            className="absolute right-2 top-2 p-2"
           >
-            Close
+            <XMarkIcon className="w-6 h-6" />
           </button>
           {content}
         </div>

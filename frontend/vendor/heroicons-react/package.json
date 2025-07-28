@@ -1,0 +1,7 @@
+{
+  "name": "@heroicons/react",
+  "version": "2.0.18",
+  "main": "index.js",
+  "module": "index.js",
+  "type": "module"
+}
