@@ -444,3 +444,21 @@ class NotificationDetailView(generics.UpdateAPIView):
         return Notification.objects.filter(user=self.request.user)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_all_notifications_read(request):
+    """Mark all of the current user's notifications as read."""
+    Notification.objects.filter(user=request.user, is_read=False).update(
+        is_read=True
+    )
+    return Response({'detail': 'All notifications marked as read.'})
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def clear_notifications(request):
+    """Delete all notifications for the current user."""
+    Notification.objects.filter(user=request.user).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
