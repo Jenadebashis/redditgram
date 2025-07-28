@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { API_BASE_URL, WS_BASE_URL } from '../config';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -11,13 +12,13 @@ function Navbar() {
 
   useEffect(() => {
     if (token) {
-      axios.get('http://localhost:9000/api/me/', {
+      axios.get(`${API_BASE_URL}/me/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then(res => setUser(res.data))
       .catch(() => setUser(null));
 
-      const ws = new WebSocket(`ws://localhost:9000/ws/notifications/?token=${token}`);
+      const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/?token=${token}`);
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
