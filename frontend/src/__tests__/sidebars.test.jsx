@@ -13,13 +13,21 @@ describe("Sidebar components", () => {
 
   test("renders left sidebar sections", async () => {
     render(<LeftSidebar mobileOpen={false} setMobileOpen={() => {}} />);
+    await waitFor(() => {
+      expect(API.get).toHaveBeenCalledWith("/posts/trending/");
+      expect(API.get).toHaveBeenCalledWith("/tags/");
+      expect(API.get).toHaveBeenCalledWith("/users/suggested/");
+    });
     expect(screen.getByText(/Trending Posts/i)).toBeInTheDocument();
-    await waitFor(() => expect(API.get).toHaveBeenCalled());
   });
 
   test("renders right sidebar sections", async () => {
     render(<RightSidebar mobileOpen={false} setMobileOpen={() => {}} />);
+    await waitFor(() => {
+      expect(API.get).toHaveBeenCalledWith("/profile/stats/");
+      expect(API.get).toHaveBeenCalledWith("/bookmarks/");
+      expect(API.get).toHaveBeenCalledWith("/notifications/");
+    });
     expect(screen.getByText(/My Activity/i)).toBeInTheDocument();
-    await waitFor(() => expect(API.get).toHaveBeenCalled());
   });
 });
