@@ -21,7 +21,7 @@ const CollapsibleSection = ({ header, uniqueKey, children }) => {
     <div className="mb-6">
       <button
         onClick={toggle}
-        className="flex items-center justify-between w-full font-semibold mb-2"
+        className="flex items-center justify-between w-full font-semibold mb-2 text-gray-700 dark:text-gray-200"
       >
         <span>{header}</span>
         <span>{open ? "\u25BC" : "\u25B6"}</span>
