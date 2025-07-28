@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BookmarkIcon } from "@heroicons/react/24/solid";
 import API from "../api";
 
 const SavedPosts = () => {
@@ -19,13 +20,16 @@ const SavedPosts = () => {
 
   return (
     <div className="mb-6">
-      <h2 className="font-semibold mb-2">Saved Posts</h2>
-      <ul className="space-y-1">
-        {bookmarks.map((b) => (
-          <li key={b.id} className="flex items-center justify-between">
-            <Link
-              to={`/posts/${b.post.id}`}
-              className="text-sm text-blue-600 hover:underline"
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <h2 className="font-semibold mb-2 flex items-center">
+          <BookmarkIcon className="w-4 h-4 mr-1" /> Saved Posts
+        </h2>
+        <ul className="space-y-1">
+          {bookmarks.map((b) => (
+            <li key={b.id} className="flex items-center justify-between">
+              <Link
+                to={`/posts/${b.post.id}`}
+                className="text-sm text-blue-600 hover:underline"
             >
               {b.post.caption}
             </Link>
@@ -37,7 +41,8 @@ const SavedPosts = () => {
             </button>
           </li>
         ))}
-      </ul>
+        </ul>
+      </div>
     </div>
   );
 };

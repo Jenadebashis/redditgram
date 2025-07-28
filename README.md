@@ -41,6 +41,9 @@ npm install
 npm run dev
 ```
 
+This project uses [Heroicons](https://github.com/tailwindlabs/heroicons) for
+section icons via the `@heroicons/react` package.
+
 The frontend reads the backend URLs from the environment variables
 `VITE_API_BASE_URL` and `VITE_WS_BASE_URL`. If not provided, they default to
 `http://localhost:9000/api` and `ws://localhost:9000` respectively.
