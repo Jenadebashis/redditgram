@@ -41,5 +41,9 @@ npm install
 npm run dev
 ```
 
+The frontend reads the backend URLs from the environment variables
+`VITE_API_BASE_URL` and `VITE_WS_BASE_URL`. If not provided, they default to
+`http://localhost:9000/api` and `ws://localhost:9000` respectively.
+
 The application will be available at `http://localhost:5173` by default. Build a
 production bundle with `npm run build` and preview it locally using `npm run preview`.

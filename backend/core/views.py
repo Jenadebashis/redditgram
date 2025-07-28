@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework.permissions import (
@@ -13,12 +11,28 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from .models import Post, Comment, Like, Follow
 from .serializers import PostSerializer, ProfileSerializer, CommentSerializer
-from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.conf import settings
+
+
+def send_verification_email(user):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    link = f"{settings.FRONTEND_URL}/verify-email?uid={uid}&token={token}"
+    send_mail(
+        "Verify your email",
+        f"Click the link to verify your email: {link}",
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=True,
+    )
 
 @api_view(['GET', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -26,23 +40,39 @@ def user_bio_view(request):
     profile = request.user.profile
 
     if request.method == 'GET':
-        serializer = ProfileSerializer(profile)
+        serializer = ProfileSerializer(profile, context={'request': request})
         return Response(serializer.data)
 
     if request.method == 'PUT':
-        serializer = ProfileSerializer(profile, data=request.data)
+        serializer = ProfileSerializer(profile, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_avatar(request):
+    profile = request.user.profile
+    serializer = ProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_info(request):
     user = request.user
+    profile = user.profile
+    avatar = profile.avatar.url if profile.avatar else None
+    if avatar and request is not None:
+        avatar = request.build_absolute_uri(avatar)
     return Response({
         'username': user.username,
         'email': user.email,
+        'avatar': avatar,
     })
     
 
@@ -59,15 +89,20 @@ def get_user_posts(request, username):
     paginator.page_size = 5
     paginated_posts = paginator.paginate_queryset(posts, request)
 
-    serialized_posts = PostSerializer(paginated_posts, many=True)
+    serialized_posts = PostSerializer(paginated_posts, many=True, context={'request': request})
 
     # 🔥 Get bio from profile
-    bio = getattr(user.profile, 'bio', '')
+    profile = user.profile
+    bio = getattr(profile, 'bio', '')
+    avatar = profile.avatar.url if profile.avatar else None
+    if avatar:
+        avatar = request.build_absolute_uri(avatar)
 
     return paginator.get_paginated_response({
         'posts': serialized_posts.data,
         'bio': bio,
         'username': user.username,
+        'avatar': avatar,
     })
 
 class UserSerializer(ModelSerializer):
@@ -77,7 +112,8 @@ class UserSerializer(ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
+        user = User.objects.create_user(is_active=False, **validated_data)
+        send_verification_email(user)
         return user
 
 class RegisterView(generics.CreateAPIView):
@@ -122,6 +158,12 @@ class CommentListCreateView(ListCreateAPIView):
     def perform_create(self, serializer):
         post = Post.objects.get(pk=self.kwargs['post_id'])
         serializer.save(author=self.request.user, post=post)
+
+
+class CommentDetailView(RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
 
 @api_view(['POST'])
@@ -186,5 +228,77 @@ def search(request):
     post_ser = PostSerializer(posts, many=True, context={'request': request})
     user_data = [{'username': u.username} for u in users]
     return Response({'posts': post_ser.data, 'users': user_data})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def verify_email(request):
+    uid = request.query_params.get('uid')
+    token = request.query_params.get('token')
+    if not uid or not token:
+        return Response({'detail': 'Invalid link.'}, status=400)
+    try:
+        uid = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return Response({'detail': 'Email verified.'})
+    return Response({'detail': 'Invalid or expired token.'}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({'email': 'This field is required.'}, status=400)
+
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        # Respond with success even if user does not exist
+        return Response({'detail': 'If an account exists, a password reset email has been sent.'})
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    link = f"{settings.FRONTEND_URL}/reset-password-confirm?uid={uid}&token={token}"
+    send_mail(
+        'Reset your password',
+        f'Click the link to reset your password: {link}',
+        settings.DEFAULT_FROM_EMAIL,
+        [email],
+        fail_silently=True,
+    )
+    return Response({
+        'detail': 'If an account exists, a password reset email has been sent.',
+        'reset_link': link,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    uid = request.data.get('uid')
+    token = request.data.get('token')
+    password = request.data.get('password')
+
+    if not all([uid, token, password]):
+        return Response({'detail': 'Missing parameters.'}, status=400)
+
+    try:
+        uid = urlsafe_base64_decode(uid).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({'detail': 'Invalid link.'}, status=400)
+
+    if default_token_generator.check_token(user, token):
+        user.set_password(password)
+        user.save()
+        return Response({'detail': 'Password reset successful.'})
+    return Response({'detail': 'Invalid or expired token.'}, status=400)
 
 
