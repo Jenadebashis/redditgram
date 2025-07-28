@@ -53,7 +53,7 @@ function Navbar() {
             <Link to="/search" className="text-gray-700 hover:text-indigo-600">Search</Link>
             <Link to="/create" className="text-gray-700 hover:text-indigo-600">New Post</Link>
             {user.avatar && (
-              <img src={user.avatar} alt={user.username} className="inline w-8 h-8 rounded-full mr-2" />
+              <Link to={`/user/${user.username}`}><img src={user.avatar} alt={user.username} className="inline w-8 h-8 rounded-full" /></Link>
             )}
             <Link to={`/user/${user.username}`}>{user.username}</Link>
             <button onClick={handleLogout} className="text-red-500 hover:underline">Logout</button>
