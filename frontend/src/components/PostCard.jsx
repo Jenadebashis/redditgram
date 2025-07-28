@@ -3,24 +3,67 @@ import { Link } from "react-router-dom";
 import API from "../api";
 import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
-// Utility to generate background color from username
-const getColorFromUsername = (username) => {
-  if (!username || typeof username !== "string") return "bg-green-500";
+// Utility to generate background color from username and caption
+const getColorFromUsername = (username, caption = "") => {
+  const text = `${username || ""}${caption}`;
+  if (!text) return "bg-green-500";
 
   const colors = [
     "bg-red-500",
-    "bg-blue-500",
-    "bg-green-500",
+    "bg-red-600",
+    "bg-orange-500",
+    "bg-orange-600",
+    "bg-amber-500",
+    "bg-amber-600",
     "bg-yellow-500",
-    "bg-purple-500",
-    "bg-pink-500",
+    "bg-lime-500",
+    "bg-green-500",
+    "bg-green-600",
+    "bg-emerald-500",
+    "bg-emerald-600",
     "bg-teal-500",
+    "bg-teal-600",
+    "bg-cyan-500",
+    "bg-cyan-600",
+    "bg-sky-500",
+    "bg-sky-600",
+    "bg-blue-500",
+    "bg-blue-600",
     "bg-indigo-500",
+    "bg-indigo-600",
+    "bg-violet-500",
+    "bg-violet-600",
+    "bg-purple-500",
+    "bg-purple-600",
+    "bg-fuchsia-500",
+    "bg-fuchsia-600",
+    "bg-pink-500",
+    "bg-pink-600",
+    "bg-rose-500",
+    "bg-rose-600",
+    "bg-red-700",
+    "bg-orange-700",
+    "bg-amber-700",
+    "bg-yellow-600",
+    "bg-lime-600",
+    "bg-green-700",
+    "bg-emerald-700",
+    "bg-teal-700",
+    "bg-cyan-700",
+    "bg-sky-700",
+    "bg-blue-700",
+    "bg-indigo-700",
+    "bg-violet-700",
+    "bg-purple-700",
+    "bg-fuchsia-700",
+    "bg-pink-700",
+    "bg-rose-700",
+    "bg-lime-700",
   ];
 
   let sum = 0;
-  for (let i = 0; i < username.length; i++) {
-    sum += username.charCodeAt(i);
+  for (let i = 0; i < text.length; i++) {
+    sum += text.charCodeAt(i);
   }
 
   return colors[sum % colors.length];
@@ -41,7 +84,7 @@ const getAvatarImage = (username) => {
 
 // 🔹 Reusable post card component
 export const PostCard = ({ post }) => {
-  const bgColor = getColorFromUsername(post.author_username);
+  const bgColor = getColorFromUsername(post.author_username, post.caption);
   const initial = post.author_username?.charAt(0).toUpperCase();
   const avatarImage = post.author_avatar || getAvatarImage(post.author_username);
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
