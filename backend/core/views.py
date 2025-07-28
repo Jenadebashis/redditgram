@@ -359,6 +359,15 @@ class BookmarkListView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
+class BookmarkDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Ensure users can only access their own bookmarks
+        return Bookmark.objects.filter(user=self.request.user)
+
+
 class UserStatsView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
