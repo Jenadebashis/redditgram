@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import Post, Profile, Comment, Tag, Bookmark, Notification
 
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
 class PostSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
     comment_count = serializers.SerializerMethodField()
@@ -81,12 +86,6 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'post', 'author', 'author_username', 'text', 'created_at']
         read_only_fields = ['author', 'post']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
