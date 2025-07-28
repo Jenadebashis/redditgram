@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from rest_framework import generics
 from django.contrib.auth.models import User
 from rest_framework.permissions import (
@@ -13,12 +11,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from .models import Post, Comment, Like, Follow
 from .serializers import PostSerializer, ProfileSerializer, CommentSerializer
-from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
