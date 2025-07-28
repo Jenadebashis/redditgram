@@ -12,7 +12,7 @@ const TagList = () => {
   }, []);
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 p-4 bg-white rounded shadow text-gray-700 dark:bg-gray-900 dark:text-gray-200">
       <h2 className="font-semibold mb-2">Trending Tags</h2>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (

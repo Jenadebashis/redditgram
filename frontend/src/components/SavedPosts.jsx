@@ -18,7 +18,7 @@ const SavedPosts = () => {
   };
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 p-4 bg-white rounded shadow text-gray-700 dark:bg-gray-900 dark:text-gray-200">
       <h2 className="font-semibold mb-2">Saved Posts</h2>
       <ul className="space-y-1">
         {bookmarks.map((b) => (
