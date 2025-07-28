@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TrendingPosts from "./TrendingPosts";
 import TagList from "./TagList";
 import SuggestedUsers from "./SuggestedUsers";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const LeftSidebar = ({ mobileOpen, setMobileOpen }) => {
   const content = (

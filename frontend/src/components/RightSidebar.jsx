@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import MyActivity from "./MyActivity";
 import SavedPosts from "./SavedPosts";
 import NotificationsPanel from "./NotificationsPanel";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 const RightSidebar = ({ mobileOpen, setMobileOpen }) => {
   const content = (

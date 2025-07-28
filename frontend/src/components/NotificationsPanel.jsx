@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import CollapsibleSection from "./CollapsibleSection";
 
 const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     API.get("/notifications/?unread_first=true")
@@ -16,7 +18,8 @@ const NotificationsPanel = () => {
           }
         });
       })
-      .catch((err) => console.error(err));
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
   const renderMessage = (n) => {
@@ -39,30 +42,36 @@ const NotificationsPanel = () => {
   };
 
   return (
-    <div className="mb-6">
-      <h2 className="font-semibold mb-2">Notifications</h2>
+    <CollapsibleSection header="Notifications" uniqueKey="notifications">
       <ul className="space-y-1">
-        {notes.map((n, idx) => (
-          <li
-            key={n.id || idx}
-            className={`text-sm ${n.is_read ? '' : 'font-semibold'}`}
-            onClick={() => {
-              if (!n.is_read) {
-                API.patch(`/notifications/${n.id}/`, { is_read: true })
-                  .then(() => {
-                    setNotes((prev) =>
-                      prev.map((p) => (p.id === n.id ? { ...p, is_read: true } : p))
-                    );
-                  })
-                  .catch((err) => console.error(err));
-              }
-            }}
-          >
-            {renderMessage(n)}
-          </li>
-        ))}
+        {loading
+          ? Array.from({ length: 3 }).map((_, idx) => (
+              <li
+                key={idx}
+                className="h-4 bg-gray-300 rounded animate-pulse"
+              ></li>
+            ))
+          : notes.map((n, idx) => (
+              <li
+                key={n.id || idx}
+                className={`text-sm ${n.is_read ? '' : 'font-semibold'}`}
+                onClick={() => {
+                  if (!n.is_read) {
+                    API.patch(`/notifications/${n.id}/`, { is_read: true })
+                      .then(() => {
+                        setNotes((prev) =>
+                          prev.map((p) => (p.id === n.id ? { ...p, is_read: true } : p))
+                        );
+                      })
+                      .catch((err) => console.error(err));
+                  }
+                }}
+              >
+                {renderMessage(n)}
+              </li>
+            ))}
       </ul>
-    </div>
+    </CollapsibleSection>
   );
 };
 

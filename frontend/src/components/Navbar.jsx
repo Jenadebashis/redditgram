@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
+import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { API_BASE_URL, WS_BASE_URL } from '../config';
 
-function Navbar() {
+function Navbar({ onToggleLeft, onToggleRight }) {
   const navigate = useNavigate();
   const token = localStorage.getItem('access');
   const [user, setUser] = useState(null);
@@ -45,8 +46,24 @@ function Navbar() {
 
   return (
     <nav className="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold text-indigo-600">RedditGram</Link>
-      <div className="space-x-4">
+      <div className="flex items-center space-x-2">
+        <button
+          onClick={onToggleLeft}
+          className="lg:hidden text-gray-700"
+          aria-label="Toggle left sidebar"
+        >
+          <Bars3Icon className="w-6 h-6" />
+        </button>
+        <Link to="/" className="text-xl font-bold text-indigo-600">RedditGram</Link>
+      </div>
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={onToggleRight}
+          className="lg:hidden text-gray-700"
+          aria-label="Toggle right sidebar"
+        >
+          <BellIcon className="w-6 h-6" />
+        </button>
         {token && user ? (
           <>
             <Link to="/feed" className="text-gray-700 hover:text-indigo-600">Feed</Link>
