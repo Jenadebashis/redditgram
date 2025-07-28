@@ -1,4 +1,5 @@
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import TrendingPosts from "./TrendingPosts";
 import TagList from "./TagList";
 import SuggestedUsers from "./SuggestedUsers";
@@ -18,17 +19,34 @@ const LeftSidebar = ({ mobileOpen, setMobileOpen }) => {
       <aside className="hidden lg:block w-64 shrink-0 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
         {content}
       </aside>
-      {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto relative">
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="absolute right-2 top-2 p-2"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
-          {content}
-        </div>
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              className="lg:hidden fixed inset-0 bg-black/50 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              className="lg:hidden fixed inset-0 bg-white z-50 overflow-y-auto"
+              initial={{ x: "-100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "-100%", opacity: 0 }}
+              transition={{ type: "tween", duration: 0.3 }}
+            >
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-2 text-right block ml-auto mr-2 mt-2"
+              >
+                Close
+              </button>
+              {content}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };
