@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { UserGroupIcon } from "@heroicons/react/24/outline";
 import API from "../api";
 import CollapsibleSection from "./CollapsibleSection";
 
@@ -15,8 +16,16 @@ const SuggestedUsers = () => {
   }, []);
 
   return (
-    <CollapsibleSection header="Suggested Users" uniqueKey="suggested-users">
-      <ul className="space-y-1">
+    <CollapsibleSection
+      header={(
+        <>
+          <UserGroupIcon className="w-4 h-4 mr-1 inline" /> Suggested Users
+        </>
+      )}
+      uniqueKey="suggested-users"
+    >
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <ul className="space-y-1">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
               <li
@@ -34,7 +43,8 @@ const SuggestedUsers = () => {
                 </Link>
               </li>
             ))}
-      </ul>
+        </ul>
+      </div>
     </CollapsibleSection>
   );
 };
