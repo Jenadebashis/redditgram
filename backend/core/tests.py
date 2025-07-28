@@ -297,3 +297,34 @@ class SignalNotificationTestCase(TestCase):
             notification_type="follow",
         ).exists()
         self.assertTrue(exists)
+
+
+class BookmarkAPITestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="bookuser", password="pass")
+        self.post = Post.objects.create(author=self.user, caption="book")
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_and_delete_bookmark(self):
+        create_url = reverse("bookmarks")
+        resp = self.client.post(create_url, {"post": self.post.id})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        bookmark_id = resp.data["id"]
+
+        detail_url = reverse("bookmark-detail", args=[bookmark_id])
+        resp = self.client.get(detail_url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        resp = self.client.delete(detail_url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Bookmark.objects.filter(id=bookmark_id).exists())
+
+    def test_cannot_delete_other_users_bookmark(self):
+        bookmark = Bookmark.objects.create(user=self.user, post=self.post)
+        other = User.objects.create_user(username="o", password="pass")
+        self.client.force_authenticate(user=other)
+        url = reverse("bookmark-detail", args=[bookmark.id])
+        resp = self.client.delete(url)
+        # should return 404 because queryset is filtered by user
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

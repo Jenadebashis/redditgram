@@ -23,6 +23,7 @@ from .views import (
     PopularTagListView,
     SuggestedUsersView,
     BookmarkListView,
+    BookmarkDetailView,
     UserStatsView,
     NotificationListView,
 )
@@ -46,6 +47,7 @@ urlpatterns = [
     path('tags/popular/', PopularTagListView.as_view(), name='tag-popular'),
     path('users/suggested/', SuggestedUsersView.as_view(), name='user-suggested'),
     path('bookmarks/', BookmarkListView.as_view(), name='bookmarks'),
+    path('bookmarks/<int:pk>/', BookmarkDetailView.as_view(), name='bookmark-detail'),
     path('profile/stats/', UserStatsView.as_view(), name='user-stats'),
     path('notifications/', NotificationListView.as_view(), name='notifications'),
     path('profile/bio/', user_bio_view),
