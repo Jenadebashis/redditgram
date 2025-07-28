@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 function CreatePost() {
   const [caption, setCaption] = useState('');
@@ -13,7 +14,7 @@ function CreatePost() {
 
     try {
       await axios.post(
-        'http://localhost:9000/api/posts/',
+        `${API_BASE_URL}/posts/`,
         { caption },
         {
           headers: {

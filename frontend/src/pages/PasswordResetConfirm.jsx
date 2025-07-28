@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
 const PasswordResetConfirm = () => {
   const [searchParams] = useSearchParams();
@@ -12,7 +13,7 @@ const PasswordResetConfirm = () => {
     const uid = searchParams.get('uid');
     const token = searchParams.get('token');
     try {
-      await axios.post('http://localhost:9000/api/password-reset-confirm/', {
+      await axios.post(`${API_BASE_URL}/password-reset-confirm/`, {
         uid,
         token,
         password,
