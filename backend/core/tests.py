@@ -251,6 +251,34 @@ class AdditionalViewsTestCase(TestCase):
             ).exists()
         )
 
+    def test_mark_all_notifications_read_endpoint(self):
+        Notification.objects.create(
+            user=self.user,
+            from_user=self.user2,
+            notification_type="like",
+            post=self.post2,
+        )
+        url = reverse("notifications-mark-all-read")
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        unread_exists = Notification.objects.filter(
+            user=self.user, is_read=False
+        ).exists()
+        self.assertFalse(unread_exists)
+
+    def test_clear_notifications_endpoint(self):
+        Notification.objects.create(
+            user=self.user,
+            from_user=self.user2,
+            notification_type="like",
+            post=self.post2,
+        )
+        url = reverse("notifications-clear-all")
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        count = Notification.objects.filter(user=self.user).count()
+        self.assertEqual(count, 0)
+
 
 class FollowListsTestCase(TestCase):
     def setUp(self):
