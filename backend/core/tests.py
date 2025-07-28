@@ -216,3 +216,39 @@ class AdditionalViewsTestCase(TestCase):
                 notification_type="follow",
             ).exists()
         )
+
+class SignalNotificationTestCase(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(username="user1", password="pass")
+        self.user2 = User.objects.create_user(username="user2", password="pass")
+
+    def test_like_creates_notification(self):
+        post = Post.objects.create(author=self.user2, caption="hi")
+        Like.objects.create(post=post, user=self.user1)
+        exists = Notification.objects.filter(
+            user=self.user2,
+            from_user=self.user1,
+            notification_type="like",
+            post=post,
+        ).exists()
+        self.assertTrue(exists)
+
+    def test_comment_creates_notification(self):
+        post = Post.objects.create(author=self.user2, caption="hi")
+        Comment.objects.create(post=post, author=self.user1, text="hey")
+        exists = Notification.objects.filter(
+            user=self.user2,
+            from_user=self.user1,
+            notification_type="comment",
+            post=post,
+        ).exists()
+        self.assertTrue(exists)
+
+    def test_follow_creates_notification(self):
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        exists = Notification.objects.filter(
+            user=self.user2,
+            from_user=self.user1,
+            notification_type="follow",
+        ).exists()
+        self.assertTrue(exists)

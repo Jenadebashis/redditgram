@@ -26,6 +26,12 @@ def send_like_notification(sender, instance, created, **kwargs):
         }
     }
     async_to_sync(channel_layer.group_send)(f'user_{instance.post.author_id}', data)
+    Notification.objects.create(
+        user=instance.post.author,
+        from_user=instance.user,
+        notification_type='like',
+        post=instance.post,
+    )
 
 
 @receiver(post_save, sender=Comment)
@@ -43,6 +49,13 @@ def send_comment_notification(sender, instance, created, **kwargs):
         }
     }
     async_to_sync(channel_layer.group_send)(f'user_{instance.post.author_id}', data)
+    Notification.objects.create(
+        user=instance.post.author,
+        from_user=instance.author,
+        notification_type='comment',
+        post=instance.post,
+    )
+
 
 
 @receiver(post_save, sender=Follow)
@@ -63,3 +76,8 @@ def send_follow_notification(sender, instance, created, **kwargs):
         }
     }
     async_to_sync(channel_layer.group_send)(f'user_{instance.following_id}', data)
+    Notification.objects.create(
+        user=instance.following,
+        from_user=instance.follower,
+        notification_type='follow',
+    )
