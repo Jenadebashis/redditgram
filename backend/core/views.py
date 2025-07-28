@@ -136,7 +136,7 @@ class TrendingPostsView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        qs = Post.objects.all()
+        qs = Post.objects.all().prefetch_related("tags")
         if self.request.query_params.get("sort") == "trending":
             qs = qs.annotate(like_count=Count("likes")).order_by("-like_count", "-created_at")
         else:
@@ -145,6 +145,15 @@ class TrendingPostsView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class TagPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        name = self.kwargs['name']
+        return Post.objects.filter(tags__name=name).order_by('-created_at').prefetch_related('tags')
 
 
 class IsAuthorOrReadOnly(BasePermission):
@@ -220,6 +229,36 @@ def follow_user(request, username):
     else:
         following = True
     return Response({'following': following})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_followers(request, username):
+    """Return a list of usernames following the given user."""
+    try:
+        target = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    follower_usernames = list(
+        target.followers.values_list('follower__username', flat=True)
+    )
+    return Response({'followers': follower_usernames})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_following(request, username):
+    """Return a list of usernames that the user is following."""
+    try:
+        target = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    following_usernames = list(
+        target.following.values_list('following__username', flat=True)
+    )
+    return Response({'following': following_usernames})
 
 
 @api_view(['GET'])
@@ -359,6 +398,15 @@ class BookmarkListView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
+class BookmarkDetailView(generics.RetrieveDestroyAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Ensure users can only access their own bookmarks
+        return Bookmark.objects.filter(user=self.request.user)
+
+
 class UserStatsView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
@@ -378,6 +426,21 @@ class NotificationListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+        qs = Notification.objects.filter(user=self.request.user)
+        if self.request.query_params.get('unread') == 'true':
+            qs = qs.filter(is_read=False)
+        if self.request.query_params.get('unread_first') == 'true':
+            qs = qs.order_by('is_read', '-created_at')
+        else:
+            qs = qs.order_by('-created_at')
+        return qs
+
+
+class NotificationDetailView(generics.UpdateAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user)
 
 

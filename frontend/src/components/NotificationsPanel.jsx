@@ -5,8 +5,17 @@ const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
 
   useEffect(() => {
-    API.get("/notifications/")
-      .then((res) => setNotes(res.data.results || res.data))
+    API.get("/notifications/?unread_first=true")
+      .then((res) => {
+        const list = res.data.results || res.data;
+        setNotes(list);
+        list.forEach((n) => {
+          if (!n.is_read) {
+            API.patch(`/notifications/${n.id}/`, { is_read: true })
+              .catch((err) => console.error(err));
+          }
+        });
+      })
       .catch((err) => console.error(err));
   }, []);
 
@@ -34,7 +43,21 @@ const NotificationsPanel = () => {
       <h2 className="font-semibold mb-2">Notifications</h2>
       <ul className="space-y-1">
         {notes.map((n, idx) => (
-          <li key={n.id || idx} className="text-sm">
+          <li
+            key={n.id || idx}
+            className={`text-sm ${n.is_read ? '' : 'font-semibold'}`}
+            onClick={() => {
+              if (!n.is_read) {
+                API.patch(`/notifications/${n.id}/`, { is_read: true })
+                  .then(() => {
+                    setNotes((prev) =>
+                      prev.map((p) => (p.id === n.id ? { ...p, is_read: true } : p))
+                    );
+                  })
+                  .catch((err) => console.error(err));
+              }
+            }}
+          >
             {renderMessage(n)}
           </li>
         ))}
