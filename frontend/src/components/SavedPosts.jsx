@@ -25,12 +25,12 @@ const SavedPosts = () => {
     <CollapsibleSection
       header={(
         <>
-          <BookmarkIcon className="w-4 h-4 mr-1 inline" /> Saved Posts
+          <BookmarkIcon className="w-4 h-4 mr-1 text-indigo-600 bg-indigo-100 rounded-full p-1" /> Saved Posts
         </>
       )}
       uniqueKey="saved-posts"
     >
-      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md">
         <ul className="space-y-1 text-gray-700 dark:text-gray-200">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (
@@ -40,7 +40,7 @@ const SavedPosts = () => {
               ></li>
             ))
           : bookmarks.map((b) => (
-              <li key={b.id} className="flex items-center justify-between">
+              <li key={b.id} className="flex items-center justify-between hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 rounded px-1">
                 <Link
                   to={`/posts/${b.post.id}`}
                   className="text-sm text-blue-600 dark:text-blue-400 hover:underline"

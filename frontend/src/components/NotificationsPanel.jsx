@@ -54,12 +54,12 @@ const NotificationsPanel = () => {
     <CollapsibleSection
       header={(
         <>
-          <BellIcon className="w-4 h-4 mr-1 inline" /> Notifications
+          <BellIcon className="w-4 h-4 mr-1 text-indigo-600 bg-indigo-100 rounded-full p-1" /> Notifications
         </>
       )}
       uniqueKey="notifications"
     >
-      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md">
         <div className="text-right mb-2 space-x-2 text-sm">
           <button onClick={markAllRead} className="hover:underline">
             Mark all as read
@@ -79,7 +79,7 @@ const NotificationsPanel = () => {
           : notes.map((n, idx) => (
               <li
                 key={n.id || idx}
-                className={`text-sm ${n.is_read ? '' : 'font-semibold'} text-gray-700 dark:text-gray-200`}
+                className={`text-sm ${n.is_read ? '' : 'font-semibold'} text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200 rounded px-1 cursor-pointer`}
                 onClick={() => {
                   if (!n.is_read) {
                     API.patch(`/notifications/${n.id}/`, { is_read: true })
