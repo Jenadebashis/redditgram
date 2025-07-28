@@ -111,7 +111,6 @@ export const PostCard = ({ post }) => {
     }
   };
 
-  console.log('the comments are: ', {comments});
 
   return (
     <motion.div
