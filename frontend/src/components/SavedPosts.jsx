@@ -6,7 +6,7 @@ const SavedPosts = () => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    API.get("/me/saved/")
+    API.get("/bookmarks/")
       .then((res) => setPosts(res.data.results || res.data))
       .catch((err) => console.error(err));
   }, []);

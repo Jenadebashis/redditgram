@@ -5,7 +5,7 @@ const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
 
   useEffect(() => {
-    API.get("/me/notifications/")
+    API.get("/notifications/")
       .then((res) => setNotes(res.data.results || res.data))
       .catch((err) => console.error(err));
   }, []);
