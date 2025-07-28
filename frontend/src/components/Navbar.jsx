@@ -55,7 +55,7 @@ function Navbar() {
             {user.avatar && (
               <img src={user.avatar} alt={user.username} className="inline w-8 h-8 rounded-full mr-2" />
             )}
-            <span className="text-gray-700">{user.username}</span>
+            <Link to={`/user/${user.username}`}>{user.username}</Link>
             <button onClick={handleLogout} className="text-red-500 hover:underline">Logout</button>
           </>
         ) : (
