@@ -1,8 +1,9 @@
 // src/api.js
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 
 const API = axios.create({
-  baseURL: 'http://127.0.0.1:9000/api',
+  baseURL: API_BASE_URL,
 });
 
 // 🔐 Add token to every request
@@ -33,7 +34,7 @@ API.interceptors.response.use(
         if (!refreshToken) throw new Error("Missing refresh token");
 
         const res = await axios.post(
-          'http://127.0.0.1:9000/api/token/refresh/',
+          `${API_BASE_URL}/token/refresh/`,
           { refresh: refreshToken }
         );
 

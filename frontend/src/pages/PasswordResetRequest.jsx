@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from "react-toastify";
+import { API_BASE_URL } from '../config';
 
 const PasswordResetRequest = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +10,7 @@ const PasswordResetRequest = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:9000/api/password-reset/', { email });
+      const res = await axios.post(`${API_BASE_URL}/password-reset/`, { email });
       if (res.data.reset_link) {
         window.location.href = res.data.reset_link;
       } else {
