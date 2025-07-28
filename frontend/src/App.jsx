@@ -21,26 +21,12 @@ function App() {
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
 
+  const toggleLeft = () => setShowLeft((v) => !v);
+  const toggleRight = () => setShowRight((v) => !v);
+
   return (
     <>
-      <Navbar />
-      {/* Mobile drawer toggles */}
-      <div className="lg:hidden fixed bottom-4 left-4 z-50">
-        <button
-          onClick={() => setShowLeft(true)}
-          className="bg-indigo-600 text-white px-3 py-2 rounded"
-        >
-          Menu
-        </button>
-      </div>
-      <div className="lg:hidden fixed bottom-4 right-4 z-50">
-        <button
-          onClick={() => setShowRight(true)}
-          className="bg-indigo-600 text-white px-3 py-2 rounded"
-        >
-          Menu
-        </button>
-      </div>
+      <Navbar onToggleLeft={toggleLeft} onToggleRight={toggleRight} />
       <div className="flex">
         <LeftSidebar mobileOpen={showLeft} setMobileOpen={setShowLeft} />
         <main className="flex-1 p-4">
