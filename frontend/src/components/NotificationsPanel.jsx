@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import { BellIcon } from "@heroicons/react/24/solid";
 
 const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
@@ -40,12 +41,15 @@ const NotificationsPanel = () => {
 
   return (
     <div className="mb-6">
-      <h2 className="font-semibold mb-2">Notifications</h2>
-      <ul className="space-y-1">
-        {notes.map((n, idx) => (
-          <li
-            key={n.id || idx}
-            className={`text-sm ${n.is_read ? '' : 'font-semibold'}`}
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+        <h2 className="font-semibold mb-2 flex items-center">
+          <BellIcon className="w-4 h-4 mr-1" /> Notifications
+        </h2>
+        <ul className="space-y-1">
+          {notes.map((n, idx) => (
+            <li
+              key={n.id || idx}
+              className={`text-sm ${n.is_read ? '' : 'font-semibold'}`}
             onClick={() => {
               if (!n.is_read) {
                 API.patch(`/notifications/${n.id}/`, { is_read: true })
@@ -61,7 +65,8 @@ const NotificationsPanel = () => {
             {renderMessage(n)}
           </li>
         ))}
-      </ul>
+        </ul>
+      </div>
     </div>
   );
 };
