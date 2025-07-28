@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Profile, Comment
+from .models import Post, Profile, Comment, Tag, Bookmark, Notification
 
 class PostSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
@@ -64,3 +64,25 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'post', 'author', 'author_username', 'text', 'created_at']
         read_only_fields = ['author', 'post']
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmark
+        fields = ['id', 'user', 'post', 'created_at']
+        read_only_fields = ['user', 'created_at']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    from_username = serializers.CharField(source='from_user.username', read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'from_user', 'from_username', 'notification_type', 'post', 'created_at']
+        read_only_fields = ['user', 'from_user', 'created_at']

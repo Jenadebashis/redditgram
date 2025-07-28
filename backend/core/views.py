@@ -13,8 +13,16 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
-from .models import Post, Comment, Like, Follow
-from .serializers import PostSerializer, ProfileSerializer, CommentSerializer
+from django.db.models import Count
+from .models import Post, Comment, Like, Follow, Tag, Bookmark, Notification
+from .serializers import (
+    PostSerializer,
+    ProfileSerializer,
+    CommentSerializer,
+    TagSerializer,
+    BookmarkSerializer,
+    NotificationSerializer,
+)
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
@@ -122,11 +130,18 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
 
-class PostListCreateView(ListCreateAPIView):
-    queryset = Post.objects.all().order_by('-created_at')
+class TrendingPostsView(ListCreateAPIView):
     serializer_class = PostSerializer
     parser_classes = [JSONParser, MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Post.objects.all()
+        if self.request.query_params.get("sort") == "trending":
+            qs = qs.annotate(like_count=Count("likes")).order_by("-like_count", "-created_at")
+        else:
+            qs = qs.order_by("-created_at")
+        return qs
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -300,5 +315,69 @@ def password_reset_confirm(request):
         user.save()
         return Response({'detail': 'Password reset successful.'})
     return Response({'detail': 'Invalid or expired token.'}, status=400)
+
+
+class TagListView(generics.ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [AllowAny]
+
+
+class PopularTagListView(generics.ListAPIView):
+    serializer_class = TagSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return Tag.objects.annotate(post_count=Count('posts')).order_by('-post_count')
+
+
+class SuggestedUsersView(generics.ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return (
+            User.objects.exclude(id=self.request.user.id)
+            .annotate(follower_count=Count('followers'))
+            .order_by('-follower_count')[:5]
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        data = [{'username': user.username} for user in queryset]
+        return Response(data)
+
+
+class BookmarkListView(generics.ListCreateAPIView):
+    serializer_class = BookmarkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Bookmark.objects.filter(user=self.request.user).select_related('post')
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class UserStatsView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        data = {
+            'post_count': Post.objects.filter(author=user).count(),
+            'following_count': user.following.count(),
+            'follower_count': user.followers.count(),
+            'bookmark_count': user.bookmarks.count(),
+        }
+        return Response(data)
+
+
+class NotificationListView(generics.ListAPIView):
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
 
 
