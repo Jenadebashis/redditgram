@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api";
+import CollapsibleSection from "./CollapsibleSection";
 
 const SavedPosts = () => {
   const [bookmarks, setBookmarks] = useState([]);
@@ -18,8 +19,7 @@ const SavedPosts = () => {
   };
 
   return (
-    <div className="mb-6">
-      <h2 className="font-semibold mb-2">Saved Posts</h2>
+    <CollapsibleSection header="Saved Posts" uniqueKey="saved-posts">
       <ul className="space-y-1">
         {bookmarks.map((b) => (
           <li key={b.id} className="flex items-center justify-between">
@@ -38,7 +38,7 @@ const SavedPosts = () => {
           </li>
         ))}
       </ul>
-    </div>
+    </CollapsibleSection>
   );
 };
 

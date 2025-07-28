@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import CollapsibleSection from "./CollapsibleSection";
 
 const MyActivity = () => {
   const [stats, setStats] = useState(null);
@@ -11,8 +12,7 @@ const MyActivity = () => {
   }, []);
 
   return (
-    <div className="mb-6">
-      <h2 className="font-semibold mb-2">My Activity</h2>
+    <CollapsibleSection header="My Activity" uniqueKey="my-activity">
       <ul className="space-y-1">
         {stats && (
           <>
@@ -23,7 +23,7 @@ const MyActivity = () => {
           </>
         )}
       </ul>
-    </div>
+    </CollapsibleSection>
   );
 };
 

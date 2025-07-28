@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api";
+import CollapsibleSection from "./CollapsibleSection";
 
 const SuggestedUsers = () => {
   const [users, setUsers] = useState([]);
@@ -12,8 +13,7 @@ const SuggestedUsers = () => {
   }, []);
 
   return (
-    <div className="mb-6">
-      <h2 className="font-semibold mb-2">Suggested Users</h2>
+    <CollapsibleSection header="Suggested Users" uniqueKey="suggested-users">
       <ul className="space-y-1">
         {users.map((user) => (
           <li key={user.id || user.username}>
@@ -26,7 +26,7 @@ const SuggestedUsers = () => {
           </li>
         ))}
       </ul>
-    </div>
+    </CollapsibleSection>
   );
 };
 

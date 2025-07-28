@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import API from "../api";
+import CollapsibleSection from "./CollapsibleSection";
 
 const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
@@ -39,8 +40,7 @@ const NotificationsPanel = () => {
   };
 
   return (
-    <div className="mb-6">
-      <h2 className="font-semibold mb-2">Notifications</h2>
+    <CollapsibleSection header="Notifications" uniqueKey="notifications">
       <ul className="space-y-1">
         {notes.map((n, idx) => (
           <li
@@ -62,7 +62,7 @@ const NotificationsPanel = () => {
           </li>
         ))}
       </ul>
-    </div>
+    </CollapsibleSection>
   );
 };
 
