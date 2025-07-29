@@ -14,7 +14,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from django.db.models import Count
-from .models import Post, Comment, Like, Follow, Tag, Bookmark, Notification
+from .models import Post, Comment, Like, CommentLike, Follow, Tag, Bookmark, Notification
 from .serializers import (
     PostSerializer,
     ProfileSerializer,
@@ -222,6 +222,23 @@ def like_post(request, post_id):
     else:
         liked = True
     return Response({'liked': liked, 'like_count': post.likes.count()})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def like_comment(request, comment_id):
+    try:
+        comment = Comment.objects.get(pk=comment_id)
+    except Comment.DoesNotExist:
+        return Response({'detail': 'Comment not found.'}, status=404)
+
+    like, created = CommentLike.objects.get_or_create(comment=comment, user=request.user)
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+    return Response({'liked': liked, 'like_count': comment.likes.count()})
 
 
 @api_view(['POST', 'GET'])

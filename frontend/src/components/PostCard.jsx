@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import API from "../api";
+import API, { likeComment } from "../api";
 import { motion } from "framer-motion";
 import { BookmarkIcon as BookmarkIconOutline } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
@@ -174,6 +174,21 @@ export const PostCard = ({ post }) => {
     }
   };
 
+  const toggleCommentLike = async (id) => {
+    try {
+      const data = await likeComment(id);
+      setComments((prev) => {
+        const updated = { ...prev };
+        updated.results = updated.results.map((c) =>
+          c.id === id ? { ...c, is_liked: data.liked, like_count: data.like_count } : c
+        );
+        return updated;
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   return (
     <motion.div
@@ -245,8 +260,11 @@ export const PostCard = ({ post }) => {
                   </button>
                 </>
               ) : (
-                <>
+                <> 
                   {' '}{c.text}
+                  <button onClick={() => toggleCommentLike(c.id)} className="ml-1 text-xs">
+                    {c.is_liked ? '💖' : '🤍'} {c.like_count ?? 0}
+                  </button>
                   {loggedInUsername === c.author_username && (
                     <>
                       <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">

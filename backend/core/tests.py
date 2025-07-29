@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import Post, Comment, Tag, Bookmark, Notification, Like, Follow
+from .models import Post, Comment, Tag, Bookmark, Notification, Like, Follow, CommentLike
 
 
 class PostAPITestCase(TestCase):
