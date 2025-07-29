@@ -177,11 +177,28 @@ class CommentListCreateView(ListCreateAPIView):
 
     def get_queryset(self):
         post_id = self.kwargs['post_id']
-        return Comment.objects.filter(post_id=post_id).order_by('created_at')
+        return Comment.objects.filter(post_id=post_id, parent__isnull=True).order_by('created_at')
 
     def perform_create(self, serializer):
         post = Post.objects.get(pk=self.kwargs['post_id'])
         serializer.save(author=self.request.user, post=post)
+
+
+class ReplyListCreateView(ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        comment_id = self.kwargs['comment_id']
+        return Comment.objects.filter(parent_id=comment_id).order_by('created_at')
+
+    def perform_create(self, serializer):
+        parent = Comment.objects.get(pk=self.kwargs['comment_id'])
+        serializer.save(
+            author=self.request.user,
+            post=parent.post,
+            parent=parent,
+        )
 
 
 class CommentDetailView(RetrieveUpdateDestroyAPIView):
