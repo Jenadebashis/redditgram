@@ -98,13 +98,17 @@ export const PostCard = ({ post }) => {
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [replyToId, setReplyToId] = useState(null);
+  const [replyText, setReplyText] = useState("");
   const [editCommentId, setEditCommentId] = useState(null);
   const [editText, setEditText] = useState("");
   const loggedInUsername = localStorage.getItem('username');
 
   useEffect(() => {
     if (showComments) {
-      API.get(`/posts/${post.id}/comments/`).then(res => setComments(res.data));
+      API.get(`/posts/${post.id}/comments/?include_replies=true`).then((res) =>
+        setComments(res.data)
+      );
     }
   }, [showComments, post.id]);
 
@@ -140,7 +144,9 @@ export const PostCard = ({ post }) => {
     try {
       await API.post(`/posts/${post.id}/comments/`, { text: newComment });
       setNewComment("");
-      const res = await API.get(`/posts/${post.id}/comments/`);
+      const res = await API.get(
+        `/posts/${post.id}/comments/?include_replies=true`
+      );
       setComments(res.data);
     } catch (err) {
       console.error(err);
@@ -155,7 +161,9 @@ export const PostCard = ({ post }) => {
   const saveEdit = async (id) => {
     try {
       await API.put(`/comments/${id}/`, { text: editText });
-      const res = await API.get(`/posts/${post.id}/comments/`);
+      const res = await API.get(
+        `/posts/${post.id}/comments/?include_replies=true`
+      );
       setComments(res.data);
       setEditCommentId(null);
       setEditText("");
@@ -167,8 +175,25 @@ export const PostCard = ({ post }) => {
   const deleteComment = async (id) => {
     try {
       await API.delete(`/comments/${id}/`);
-      const res = await API.get(`/posts/${post.id}/comments/`);
+      const res = await API.get(
+        `/posts/${post.id}/comments/?include_replies=true`
+      );
       setComments(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const submitReply = async (commentId) => {
+    if (!replyText.trim()) return;
+    try {
+      await API.post(`/comments/${commentId}/replies/`, { text: replyText });
+      const res = await API.get(
+        `/posts/${post.id}/comments/?include_replies=true`
+      );
+      setComments(res.data);
+      setReplyToId(null);
+      setReplyText('');
     } catch (err) {
       console.error(err);
     }
@@ -228,37 +253,74 @@ export const PostCard = ({ post }) => {
       {showComments && (
         <div className="mt-3 bg-white/10 p-3 rounded">
           {comments?.results?.map?.((c) => (
-            <div key={c.id} className="text-sm mb-1">
-              <strong>@{c.author_username}</strong>:
-              {editCommentId === c.id ? (
-                <>
-                  <input
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    className="ml-1 p-1 rounded text-black"
-                  />
-                  <button onClick={() => saveEdit(c.id)} className="ml-1 text-xs text-indigo-500">
-                    Save
-                  </button>
-                  <button onClick={() => setEditCommentId(null)} className="ml-1 text-xs text-gray-500">
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <>
-                  {' '}{c.text}
-                  {loggedInUsername === c.author_username && (
-                    <>
-                      <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">
-                        Edit
-                      </button>
-                      <button onClick={() => deleteComment(c.id)} className="ml-1 text-xs text-red-500">
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </>
-              )}
+            <div key={c.id} className="text-sm mb-2">
+              <div>
+                <strong>@{c.author_username}</strong>:
+                {editCommentId === c.id ? (
+                  <>
+                    <input
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      className="ml-1 p-1 rounded text-black"
+                    />
+                    <button onClick={() => saveEdit(c.id)} className="ml-1 text-xs text-indigo-500">
+                      Save
+                    </button>
+                    <button onClick={() => setEditCommentId(null)} className="ml-1 text-xs text-gray-500">
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {' '}{c.text}
+                    {loggedInUsername === c.author_username && (
+                      <>
+                        <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">
+                          Edit
+                        </button>
+                        <button onClick={() => deleteComment(c.id)} className="ml-1 text-xs text-red-500">
+                          Delete
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="ml-4">
+                <button
+                  onClick={() => {
+                    setReplyToId(c.id);
+                    setReplyText('');
+                  }}
+                  className="text-xs text-indigo-400 mr-2"
+                >
+                  Reply
+                </button>
+                {replyToId === c.id && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      submitReply(c.id);
+                    }}
+                    className="mt-1 flex"
+                  >
+                    <input
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      className="flex-grow text-black p-1 rounded"
+                      placeholder="Add a reply"
+                    />
+                    <button type="submit" className="ml-1 px-2 text-xs bg-indigo-600 rounded">
+                      Reply
+                    </button>
+                  </form>
+                )}
+                {c.replies?.map?.((r) => (
+                  <div key={r.id} className="mt-1 ml-4">
+                    <strong>@{r.author_username}</strong> {r.text}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
           <form onSubmit={handleComment} className="mt-2 flex">
