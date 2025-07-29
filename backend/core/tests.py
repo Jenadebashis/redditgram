@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from .models import Post, Comment, Tag, Bookmark, Notification, Like, Follow
+from .models import Post, Comment, Tag, Bookmark, Notification, Like, Follow, CommentLike
 
 
 class PostAPITestCase(TestCase):
@@ -380,3 +380,32 @@ class BookmarkAPITestCase(TestCase):
         resp = self.client.delete(url)
         # should return 404 because queryset is filtered by user
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class CommentLikeTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="clike", password="pass")
+        self.other = User.objects.create_user(username="otherclike", password="pass")
+        self.post = Post.objects.create(author=self.other, caption="c")
+        self.comment = Comment.objects.create(post=self.post, author=self.other, text="hi")
+
+    def test_like_requires_auth(self):
+        url = reverse("like-comment", args=[self.comment.id])
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_like_and_unlike_comment(self):
+        url = reverse("like-comment", args=[self.comment.id])
+        self.client.force_authenticate(user=self.user)
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(resp.data["liked"])
+        self.assertEqual(resp.data["like_count"], 1)
+        self.assertTrue(CommentLike.objects.filter(comment=self.comment, user=self.user).exists())
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertFalse(resp.data["liked"])
+        self.assertEqual(resp.data["like_count"], 0)
+        self.assertFalse(CommentLike.objects.filter(comment=self.comment, user=self.user).exists())
