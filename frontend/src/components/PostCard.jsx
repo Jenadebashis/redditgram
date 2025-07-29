@@ -100,11 +100,24 @@ export const PostCard = ({ post }) => {
   const [newComment, setNewComment] = useState("");
   const [editCommentId, setEditCommentId] = useState(null);
   const [editText, setEditText] = useState("");
+  const [replyingId, setReplyingId] = useState(null);
+  const [replyText, setReplyText] = useState("");
   const loggedInUsername = localStorage.getItem('username');
+
+  const fetchComments = async () => {
+    const res = await API.get(`/posts/${post.id}/comments/`);
+    const commentsWithReplies = await Promise.all(
+      res.data.results.map(async (c) => {
+        const repliesRes = await API.get(`/comments/${c.id}/replies/`);
+        return { ...c, replies: repliesRes.data.results };
+      })
+    );
+    setComments({ ...res.data, results: commentsWithReplies });
+  };
 
   useEffect(() => {
     if (showComments) {
-      API.get(`/posts/${post.id}/comments/`).then(res => setComments(res.data));
+      fetchComments();
     }
   }, [showComments, post.id]);
 
@@ -140,8 +153,20 @@ export const PostCard = ({ post }) => {
     try {
       await API.post(`/posts/${post.id}/comments/`, { text: newComment });
       setNewComment("");
-      const res = await API.get(`/posts/${post.id}/comments/`);
-      setComments(res.data);
+      await fetchComments();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleReply = async (e, parentId) => {
+    e.preventDefault();
+    if (!replyText.trim()) return;
+    try {
+      await API.post(`/comments/${parentId}/replies/`, { text: replyText });
+      setReplyText("");
+      setReplyingId(null);
+      await fetchComments();
     } catch (err) {
       console.error(err);
     }
@@ -155,8 +180,7 @@ export const PostCard = ({ post }) => {
   const saveEdit = async (id) => {
     try {
       await API.put(`/comments/${id}/`, { text: editText });
-      const res = await API.get(`/posts/${post.id}/comments/`);
-      setComments(res.data);
+      await fetchComments();
       setEditCommentId(null);
       setEditText("");
     } catch (err) {
@@ -167,8 +191,7 @@ export const PostCard = ({ post }) => {
   const deleteComment = async (id) => {
     try {
       await API.delete(`/comments/${id}/`);
-      const res = await API.get(`/posts/${post.id}/comments/`);
-      setComments(res.data);
+      await fetchComments();
     } catch (err) {
       console.error(err);
     }
@@ -177,17 +200,77 @@ export const PostCard = ({ post }) => {
   const toggleCommentLike = async (id) => {
     try {
       const data = await likeComment(id);
-      setComments((prev) => {
-        const updated = { ...prev };
-        updated.results = updated.results.map((c) =>
-          c.id === id ? { ...c, is_liked: data.liked, like_count: data.like_count } : c
-        );
-        return updated;
-      });
+      const updateRecursive = (items) =>
+        items.map((c) => {
+          if (c.id === id) {
+            return { ...c, is_liked: data.liked, like_count: data.like_count };
+          }
+          if (c.replies) {
+            return { ...c, replies: updateRecursive(c.replies) };
+          }
+          return c;
+        });
+      setComments((prev) => ({ ...prev, results: updateRecursive(prev.results) }));
     } catch (err) {
       console.error(err);
     }
   };
+
+  const renderComment = (c, depth = 0) => (
+    <div key={c.id} className="text-sm mb-1" style={{ marginLeft: depth * 16 }}>
+      <strong>@{c.author_username}</strong>:
+      {editCommentId === c.id ? (
+        <>
+          <input
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            className="ml-1 p-1 rounded text-black"
+          />
+          <button onClick={() => saveEdit(c.id)} className="ml-1 text-xs text-indigo-500">
+            Save
+          </button>
+          <button onClick={() => setEditCommentId(null)} className="ml-1 text-xs text-gray-500">
+            Cancel
+          </button>
+        </>
+      ) : (
+        <>
+          {' '}
+          {c.text}
+          <button onClick={() => toggleCommentLike(c.id)} className="ml-1 text-xs">
+            {c.is_liked ? '💖' : '🤍'} {c.like_count ?? 0}
+          </button>
+          <button onClick={() => { setReplyingId(c.id); setReplyText(''); }} className="ml-1 text-xs text-indigo-500">
+            Reply
+          </button>
+          {loggedInUsername === c.author_username && (
+            <>
+              <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">
+                Edit
+              </button>
+              <button onClick={() => deleteComment(c.id)} className="ml-1 text-xs text-red-500">
+                Delete
+              </button>
+            </>
+          )}
+        </>
+      )}
+      {replyingId === c.id && (
+        <form onSubmit={(e) => handleReply(e, c.id)} className="mt-1 flex">
+          <input
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            className="flex-grow text-black p-1 rounded"
+            placeholder="Add a reply"
+          />
+          <button type="submit" className="ml-1 px-2 text-xs bg-indigo-600 rounded">
+            Post
+          </button>
+        </form>
+      )}
+      {c.replies?.map?.((r) => renderComment(r, depth + 1))}
+    </div>
+  );
 
 
   return (
@@ -242,43 +325,7 @@ export const PostCard = ({ post }) => {
 
       {showComments && (
         <div className="mt-3 bg-white/10 p-3 rounded">
-          {comments?.results?.map?.((c) => (
-            <div key={c.id} className="text-sm mb-1">
-              <strong>@{c.author_username}</strong>:
-              {editCommentId === c.id ? (
-                <>
-                  <input
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    className="ml-1 p-1 rounded text-black"
-                  />
-                  <button onClick={() => saveEdit(c.id)} className="ml-1 text-xs text-indigo-500">
-                    Save
-                  </button>
-                  <button onClick={() => setEditCommentId(null)} className="ml-1 text-xs text-gray-500">
-                    Cancel
-                  </button>
-                </>
-              ) : (
-                <> 
-                  {' '}{c.text}
-                  <button onClick={() => toggleCommentLike(c.id)} className="ml-1 text-xs">
-                    {c.is_liked ? '💖' : '🤍'} {c.like_count ?? 0}
-                  </button>
-                  {loggedInUsername === c.author_username && (
-                    <>
-                      <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">
-                        Edit
-                      </button>
-                      <button onClick={() => deleteComment(c.id)} className="ml-1 text-xs text-red-500">
-                        Delete
-                      </button>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
+          {comments?.results?.map?.((c) => renderComment(c))}
           <form onSubmit={handleComment} className="mt-2 flex">
             <input
               value={newComment}

@@ -27,12 +27,13 @@ const samplePost = {
 
 const sampleComments = {
   results: [
-    { id: 2, text: 'hey', author_username: 'alice', is_liked: false, like_count: 0 },
+    { id: 2, text: 'hey', author_username: 'alice', is_liked: false, like_count: 0, replies: [] },
   ],
 };
 
 test('liking a comment updates count', async () => {
   API.get.mockResolvedValueOnce({ data: sampleComments });
+  API.get.mockResolvedValueOnce({ data: { results: [] } });
   likeComment.mockResolvedValue({ liked: true, like_count: 1 });
 
   render(<PostCard post={samplePost} />);
@@ -40,6 +41,7 @@ test('liking a comment updates count', async () => {
   fireEvent.click(screen.getByText(/💬/));
 
   await screen.findByText('hey');
+  expect(API.get).toHaveBeenCalledWith('/comments/2/replies/');
 
   const btn = screen.getByText('🤍 0');
   fireEvent.click(btn);
