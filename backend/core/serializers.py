@@ -96,11 +96,22 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
+    like_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'author', 'author_username', 'text', 'created_at']
+        fields = ['id', 'post', 'author', 'author_username', 'text', 'created_at', 'like_count', 'is_liked']
         read_only_fields = ['author', 'post']
+
+    def get_like_count(self, obj):
+        return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(user=request.user).exists()
+        return False
 
 
 class BookmarkSerializer(serializers.ModelSerializer):

@@ -29,6 +29,18 @@ class Comment(models.Model):
         return f"{self.author.username}: {self.text[:20]}"
 
 
+class CommentLike(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("comment", "user")
+
+    def __str__(self):
+        return f"{self.user.username} -> comment {self.comment.id}"
+
+
 class Like(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
