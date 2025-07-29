@@ -11,6 +11,8 @@ class PostSerializer(serializers.ModelSerializer):
     comment_count = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    is_bookmarked = serializers.SerializerMethodField()
+    bookmark_id = serializers.SerializerMethodField()
     author_avatar = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, read_only=True)
     tag_names = serializers.ListField(
@@ -28,6 +30,8 @@ class PostSerializer(serializers.ModelSerializer):
             'comment_count',
             'like_count',
             'is_liked',
+            'is_bookmarked',
+            'bookmark_id',
             'tags',
             'tag_names',
         ]
@@ -44,6 +48,17 @@ class PostSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.likes.filter(user=request.user).exists()
         return False
+
+    def get_bookmark_id(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            bookmark = obj.bookmarks.filter(user=request.user).first()
+            if bookmark:
+                return bookmark.id
+        return None
+
+    def get_is_bookmarked(self, obj):
+        return self.get_bookmark_id(obj) is not None
 
     def get_author_avatar(self, obj):
         avatar = getattr(obj.author.profile, 'avatar', None)
@@ -89,6 +104,14 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
+    """Serialize bookmarks with nested post details for easy display."""
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Include basic post info so the frontend can link directly to the post
+        data["post"] = PostSerializer(instance.post, context=self.context).data
+        return data
+
     class Meta:
         model = Bookmark
         fields = ['id', 'user', 'post', 'created_at']
