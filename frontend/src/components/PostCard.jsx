@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api";
 import { motion } from "framer-motion";
+import { BookmarkIcon as BookmarkIconOutline } from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
 // Utility to generate background color from username and caption
 const getColorFromUsername = (username, caption = "") => {
@@ -91,6 +93,8 @@ export const PostCard = ({ post }) => {
 
   const [liked, setLiked] = useState(post.is_liked);
   const [likeCount, setLikeCount] = useState(post.like_count);
+  const [bookmarked, setBookmarked] = useState(post.is_bookmarked);
+  const [bookmarkId, setBookmarkId] = useState(post.bookmark_id);
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -109,6 +113,22 @@ export const PostCard = ({ post }) => {
       const res = await API.post(`/posts/${post.id}/like/`);
       setLiked(res.data.liked);
       setLikeCount(res.data.like_count);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    try {
+      if (bookmarked) {
+        await API.delete(`/bookmarks/${bookmarkId}/`);
+        setBookmarked(false);
+        setBookmarkId(null);
+      } else {
+        const res = await API.post('/bookmarks/', { post: post.id });
+        setBookmarked(true);
+        setBookmarkId(res.data.id);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -194,6 +214,13 @@ export const PostCard = ({ post }) => {
         </button>
         <button onClick={() => setShowComments(!showComments)} className="text-sm">
           💬 {post.comment_count}
+        </button>
+        <button onClick={toggleBookmark} className="text-sm">
+          {bookmarked ? (
+            <BookmarkIconSolid className="w-4 h-4 inline" />
+          ) : (
+            <BookmarkIconOutline className="w-4 h-4 inline" />
+          )}
         </button>
         <span className="ml-auto text-xs text-white/80">{timeAgo}</span>
       </div>
