@@ -57,4 +57,9 @@ API.interceptors.response.use(
   }
 );
 
+export const likeComment = async (commentId) => {
+  const res = await API.post(`/comments/${commentId}/like/`);
+  return res.data;
+};
+
 export default API;
