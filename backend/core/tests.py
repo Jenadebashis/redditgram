@@ -360,6 +360,13 @@ class BookmarkAPITestCase(TestCase):
         detail_url = reverse("bookmark-detail", args=[bookmark_id])
         resp = self.client.get(detail_url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        # response should include serialized post data
+        self.assertEqual(resp.data["post"]["id"], self.post.id)
+        self.assertIn("caption", resp.data["post"])
+
+        list_resp = self.client.get(create_url)
+        self.assertEqual(list_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(list_resp.data["results"][0]["post"]["id"], self.post.id)
 
         resp = self.client.delete(detail_url)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)

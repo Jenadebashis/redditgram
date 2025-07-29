@@ -104,6 +104,14 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
+    """Serialize bookmarks with nested post details for easy display."""
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Include basic post info so the frontend can link directly to the post
+        data["post"] = PostSerializer(instance.post, context=self.context).data
+        return data
+
     class Meta:
         model = Bookmark
         fields = ['id', 'user', 'post', 'created_at']
