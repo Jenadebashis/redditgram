@@ -96,11 +96,18 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source='author.username', read_only=True)
+    parent = serializers.PrimaryKeyRelatedField(read_only=True)
+    replies = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
-        fields = ['id', 'post', 'author', 'author_username', 'text', 'created_at']
-        read_only_fields = ['author', 'post']
+        fields = ['id', 'post', 'parent', 'author', 'author_username', 'text', 'created_at', 'replies']
+        read_only_fields = ['author', 'post', 'parent']
+
+    def get_replies(self, obj):
+        qs = obj.replies.order_by('created_at')
+        serializer = CommentSerializer(qs, many=True, context=self.context)
+        return serializer.data
 
 
 class BookmarkSerializer(serializers.ModelSerializer):

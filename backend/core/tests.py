@@ -380,3 +380,47 @@ class BookmarkAPITestCase(TestCase):
         resp = self.client.delete(url)
         # should return 404 because queryset is filtered by user
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class ReplyAPITestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(username="r1", password="pass")
+        self.user2 = User.objects.create_user(username="r2", password="pass")
+        self.post = Post.objects.create(author=self.user1, caption="cap")
+        self.comment = Comment.objects.create(post=self.post, author=self.user1, text="root")
+
+    def test_create_and_list_reply(self):
+        url = reverse("comment-replies", args=[self.comment.id])
+        self.client.force_authenticate(user=self.user2)
+        resp = self.client.post(url, {"text": "reply"})
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        reply_id = resp.data["id"]
+        self.assertEqual(resp.data["parent"], self.comment.id)
+
+        list_resp = self.client.get(url)
+        self.assertEqual(list_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(list_resp.data["results"][0]["id"], reply_id)
+
+    def test_reply_permissions_on_delete(self):
+        reply = Comment.objects.create(post=self.post, author=self.user2, text="r", parent=self.comment)
+        url = reverse("comment-detail", args=[reply.id])
+
+        self.client.force_authenticate(user=self.user1)
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Comment.objects.filter(id=reply.id).exists())
+
+        self.client.force_authenticate(user=self.user2)
+        resp = self.client.delete(url)
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Comment.objects.filter(id=reply.id).exists())
+
+    def test_comment_list_returns_only_root(self):
+        Comment.objects.create(post=self.post, author=self.user2, text="child", parent=self.comment)
+        url = reverse("comments", args=[self.post.id])
+        self.client.force_authenticate(user=self.user1)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        ids = [c["id"] for c in resp.data["results"]]
+        self.assertEqual(ids, [self.comment.id])
