@@ -7,7 +7,8 @@ from rest_framework.permissions import (
     SAFE_METHODS,
 )
 from rest_framework.serializers import ModelSerializer
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework import serializers
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import PageNumberPagination
@@ -61,6 +62,7 @@ def user_bio_view(request):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
 def update_avatar(request):
     profile = request.user.profile
     serializer = ProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
@@ -81,6 +83,7 @@ def get_user_info(request):
         'username': user.username,
         'email': user.email,
         'avatar': avatar,
+        'profession': profile.profession,
     })
     
 
@@ -144,7 +147,11 @@ class TrendingPostsView(ListCreateAPIView):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        profession = serializer.validated_data.get('profession')
+        user_profession = getattr(self.request.user.profile, 'profession', '')
+        if profession and profession != user_profession:
+            raise serializers.ValidationError('Invalid profession')
+        serializer.save(author=self.request.user, profession=profession or user_profession)
 
 
 class TagPostsView(generics.ListAPIView):
@@ -154,6 +161,34 @@ class TagPostsView(generics.ListAPIView):
     def get_queryset(self):
         name = self.kwargs['name']
         return Post.objects.filter(tags__name=name).order_by('-created_at').prefetch_related('tags')
+
+
+class ProfessionPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profession = self.kwargs['profession']
+        return Post.objects.filter(profession=profession).order_by('-created_at').prefetch_related('tags')
+
+
+class FeelingPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        feeling = self.kwargs['feeling']
+        return Post.objects.filter(feeling=feeling).order_by('-created_at').prefetch_related('tags')
+
+
+class ProfessionFeelingPostsView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        profession = self.kwargs['profession']
+        feeling = self.kwargs['feeling']
+        return Post.objects.filter(profession=profession, feeling=feeling).order_by('-created_at').prefetch_related('tags')
 
 
 class IsAuthorOrReadOnly(BasePermission):

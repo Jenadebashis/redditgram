@@ -1,9 +1,46 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# New constants for professions and feelings
+PROFESSION_CHOICES = [
+    ("doctor", "Doctor"),
+    ("engineer", "Engineer"),
+    ("teacher", "Teacher"),
+    ("lawyer", "Lawyer"),
+    ("nurse", "Nurse"),
+    ("scientist", "Scientist"),
+    ("accountant", "Accountant"),
+    ("artist", "Artist"),
+    ("manager", "Manager"),
+    ("developer", "Developer"),
+]
+
+FEELING_CHOICES = [
+    ("happy", "Happy"),
+    ("sad", "Sad"),
+    ("angry", "Angry"),
+    ("fear", "Fear"),
+    ("surprise", "Surprise"),
+    ("disgust", "Disgust"),
+    ("trust", "Trust"),
+    ("anticipation", "Anticipation"),
+]
+
 class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     caption = models.TextField()
+    profession = models.CharField(
+        max_length=30,
+        choices=PROFESSION_CHOICES,
+        blank=True,
+        null=True,
+    )
+    feeling = models.CharField(
+        max_length=30,
+        choices=FEELING_CHOICES,
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -13,6 +50,12 @@ class Post(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True, default='')
+    profession = models.CharField(
+        max_length=30,
+        choices=PROFESSION_CHOICES,
+        blank=True,
+        null=True,
+    )
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):

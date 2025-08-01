@@ -3,12 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import TrendingPosts from "./TrendingPosts";
 import TagList from "./TagList";
 import SuggestedUsers from "./SuggestedUsers";
+import ProfessionList from "./ProfessionList";
+import FeelingList from "./FeelingList";
 
 const LeftSidebar = ({ mobileOpen, setMobileOpen }) => {
   const content = (
     <div className="p-4 space-y-6 text-gray-700 dark:text-gray-200">
       <TrendingPosts />
       <TagList />
+      <ProfessionList />
+      <FeelingList />
       <SuggestedUsers />
     </div>
   );
