@@ -26,6 +26,8 @@ class PostSerializer(serializers.ModelSerializer):
             'author_username',
             'author_avatar',
             'caption',
+            'profession',
+            'feeling',
             'created_at',
             'comment_count',
             'like_count',
@@ -84,7 +86,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['bio', 'avatar', 'avatar_url']
+        fields = ['bio', 'profession', 'avatar', 'avatar_url']
+        extra_kwargs = {
+            'profession': {'required': False, 'allow_null': True, 'allow_blank': True}
+        }
 
     def get_avatar_url(self, obj):
         if obj.avatar:
