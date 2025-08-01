@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Profile, Comment, Tag, Bookmark, Notification
+from .models import Post, Profile, Comment, Tag, Bookmark, Notification, Story
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -148,3 +148,12 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'user', 'from_user', 'from_username', 'notification_type', 'post', 'created_at', 'is_read']
         read_only_fields = ['user', 'from_user', 'created_at']
+
+
+class StorySerializer(serializers.ModelSerializer):
+    author_username = serializers.CharField(source='author.username', read_only=True)
+
+    class Meta:
+        model = Story
+        fields = ['id', 'author', 'author_username', 'file', 'caption', 'created_at', 'expires_at']
+        read_only_fields = ['author', 'created_at']

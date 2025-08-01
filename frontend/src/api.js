@@ -62,4 +62,9 @@ export const likeComment = async (commentId) => {
   return res.data;
 };
 
+export const fetchStories = () => API.get('/stories/');
+export const createStory = (data) =>
+  API.post('/stories/', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const deleteStory = (id) => API.delete(`/stories/${id}/`);
+
 export default API;

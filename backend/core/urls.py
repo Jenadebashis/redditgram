@@ -34,6 +34,8 @@ from .views import (
     NotificationDetailView,
     mark_all_notifications_read,
     clear_notifications,
+    StoryListCreateView,
+    StoryDetailView,
 )
 
 urlpatterns = [
@@ -61,6 +63,8 @@ urlpatterns = [
     path('users/suggested/', SuggestedUsersView.as_view(), name='user-suggested'),
     path('bookmarks/', BookmarkListView.as_view(), name='bookmarks'),
     path('bookmarks/<int:pk>/', BookmarkDetailView.as_view(), name='bookmark-detail'),
+    path('stories/', StoryListCreateView.as_view(), name='story-list'),
+    path('stories/<int:pk>/', StoryDetailView.as_view(), name='story-detail'),
     path('profile/stats/', UserStatsView.as_view(), name='user-stats'),
     path('notifications/', NotificationListView.as_view(), name='notifications'),
     path('notifications/mark_all_read/', mark_all_notifications_read, name='notifications-mark-all-read'),

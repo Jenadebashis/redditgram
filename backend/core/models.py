@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 # New constants for professions and feelings
 PROFESSION_CHOICES = [
@@ -151,3 +152,24 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.notification_type} -> {self.user.username}"
+
+
+class Story(models.Model):
+    """Temporary story content similar to Instagram stories."""
+
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="stories")
+    file = models.FileField(upload_to="stories/")
+    caption = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"story {self.id} by {self.author.username}"
+
+    @classmethod
+    def delete_expired(cls):
+        """Delete all expired stories."""
+        cls.objects.filter(expires_at__lte=timezone.now()).delete()
