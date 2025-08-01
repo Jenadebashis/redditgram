@@ -65,11 +65,12 @@ def user_bio_view(request):
 @parser_classes([MultiPartParser, FormParser])
 def update_avatar(request):
     profile = request.user.profile
-    serializer = ProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+    avatar = request.FILES.get('avatar')
+    if not avatar:
+        return Response({'avatar': 'No file provided.'}, status=400)
+    profile.avatar.save(avatar.name, avatar)
+    serializer = ProfileSerializer(profile, context={'request': request})
+    return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -105,6 +106,7 @@ def get_user_posts(request, username):
     # 🔥 Get bio from profile
     profile = user.profile
     bio = getattr(profile, 'bio', '')
+    profession = getattr(profile, 'profession', '')
     avatar = profile.avatar.url if profile.avatar else None
     if avatar:
         avatar = request.build_absolute_uri(avatar)
@@ -112,6 +114,7 @@ def get_user_posts(request, username):
     return paginator.get_paginated_response({
         'posts': serialized_posts.data,
         'bio': bio,
+        'profession': profession,
         'username': user.username,
         'avatar': avatar,
     })
