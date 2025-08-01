@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
+from datetime import timedelta
 
 from .models import Post, Comment, Tag, Bookmark, Notification, Like, Follow, CommentLike
 
@@ -424,3 +426,34 @@ class ReplyAPITestCase(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         ids = [c["id"] for c in resp.data["results"]]
         self.assertEqual(ids, [self.comment.id])
+
+
+class StoryAPITestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(username="story", password="pass")
+        self.client.force_authenticate(user=self.user)
+
+    def test_create_and_list_story(self):
+        url = reverse("story-list")
+        file = SimpleUploadedFile("story.png", b"img", content_type="image/png")
+        expires = timezone.now() + timedelta(hours=1)
+        resp = self.client.post(url, {"file": file, "caption": "hi", "expires_at": expires.isoformat()}, format="multipart")
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        list_resp = self.client.get(url)
+        self.assertEqual(list_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(list_resp.data["results"]), 1)
+
+    def test_expired_story_not_listed(self):
+        from core.models import Story
+        expired = Story.objects.create(
+            author=self.user,
+            file=SimpleUploadedFile("s.png", b"x", content_type="image/png"),
+            expires_at=timezone.now() - timedelta(hours=1),
+        )
+
+        url = reverse("story-list")
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(resp.data["results"]), 0)

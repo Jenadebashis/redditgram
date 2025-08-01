@@ -15,7 +15,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from django.db.models import Count
-from .models import Post, Comment, Like, CommentLike, Follow, Tag, Bookmark, Notification
+from .models import Post, Comment, Like, CommentLike, Follow, Tag, Bookmark, Notification, Story
 from .serializers import (
     PostSerializer,
     ProfileSerializer,
@@ -23,12 +23,14 @@ from .serializers import (
     TagSerializer,
     BookmarkSerializer,
     NotificationSerializer,
+    StorySerializer,
 )
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.conf import settings
+from django.utils import timezone
 
 
 def send_verification_email(user):
@@ -532,5 +534,26 @@ def clear_notifications(request):
     """Delete all notifications for the current user."""
     Notification.objects.filter(user=request.user).delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class StoryListCreateView(generics.ListCreateAPIView):
+    serializer_class = StorySerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        Story.delete_expired()
+        return Story.objects.filter(expires_at__gt=timezone.now())
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class StoryDetailView(generics.DestroyAPIView):
+    serializer_class = StorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Story.objects.filter(author=self.request.user)
 
 
