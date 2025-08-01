@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { BriefcaseIcon } from "@heroicons/react/24/outline";
 import CollapsibleSection from "./CollapsibleSection";
 
-const professions = [
+export const professions = [
   "doctor",
   "engineer",
   "teacher",

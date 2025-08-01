@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FaceSmileIcon } from "@heroicons/react/24/outline";
 import CollapsibleSection from "./CollapsibleSection";
 
-const feelings = [
+export const feelings = [
   "happy",
   "sad",
   "angry",

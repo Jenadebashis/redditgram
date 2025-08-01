@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import API from '../api';
 import { PostCard } from '../components/PostCard';
 import EditBio from '../components/UpdateBio';
+import EditProfession from '../components/UpdateProfession';
 
 const UserPosts = () => {
   const { username } = useParams();
@@ -14,16 +15,19 @@ const UserPosts = () => {
   const [error, setError] = useState('');
   const [nextPage, setNextPage] = useState(null);
   const [bio, setBio] = useState('');
+  const [profession, setProfession] = useState('');
   const [avatar, setAvatar] = useState('');
   const [uploadMsg, setUploadMsg] = useState('');
   const [editingBio, setEditingBio] = useState(false);
+  const [editingProfession, setEditingProfession] = useState(false);
   const [following, setFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const loggedInUsername = localStorage.getItem('username'); // or decode JWT token if needed
   const isOwner = loggedInUsername === username;
 
-  const updatedBio = useSelector(state => state.user.bio); // Assuming you have a Redux store setup
+  const updatedBio = useSelector(state => state.user.bio);
+  const updatedProfession = useSelector(state => state.user.profession);
   useEffect(() => {
     if (updatedBio) {
       setBio(updatedBio);
@@ -31,11 +35,19 @@ const UserPosts = () => {
     }
   }, [updatedBio]);
 
+  useEffect(() => {
+    if (updatedProfession) {
+      setProfession(updatedProfession);
+      setEditingProfession(false);
+    }
+  }, [updatedProfession]);
+
   const fetchUserPosts = (url = `/posts/user/${username}/`) => {
     API.get(url)
       .then((res) => {
         setPosts((prev) => [...prev, ...res.data.results.posts]);
         setBio(res.data.results.bio);
+        setProfession(res.data.results.profession || '');
         setAvatar(res.data.results.avatar);
         setNextPage(res.data.next);
         setLoading(false);
@@ -110,6 +122,11 @@ const UserPosts = () => {
             <p className="text-sm text-gray-600 mt-2">
               {bio || "This user hasn’t written a bio yet."}
             </p>
+            {profession && (
+              <p className="text-sm text-gray-600 mt-1">
+                Profession: {profession.charAt(0).toUpperCase() + profession.slice(1)}
+              </p>
+            )}
             {!isOwner && (
               <button onClick={toggleFollow} className="mt-2 text-sm text-indigo-500 hover:underline">
                 {following ? 'Unfollow' : 'Follow'}
@@ -130,6 +147,18 @@ const UserPosts = () => {
                   <EditBio
                     initialBio={bio}
                   />
+                )}
+                {!editingProfession && (
+                  <button
+                    onClick={() => setEditingProfession(true)}
+                    className="mt-2 text-sm text-indigo-500 hover:underline"
+                  >
+                    Edit Profession
+                  </button>
+                )}
+
+                {editingProfession && (
+                  <EditProfession initialProfession={profession} />
                 )}
                 <label className="mt-2 text-sm text-indigo-500 hover:underline cursor-pointer">
                   Change Avatar
