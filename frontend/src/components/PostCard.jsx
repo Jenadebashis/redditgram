@@ -102,7 +102,12 @@ export const PostCard = ({ post }) => {
   const [editText, setEditText] = useState("");
   const [replyingId, setReplyingId] = useState(null);
   const [replyText, setReplyText] = useState("");
+  const [openThreads, setOpenThreads] = useState({});
   const loggedInUsername = localStorage.getItem('username');
+
+  const toggleReplies = (id) => {
+    setOpenThreads((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const fetchComments = async () => {
     const res = await API.get(`/posts/${post.id}/comments/`);
@@ -113,6 +118,7 @@ export const PostCard = ({ post }) => {
       })
     );
     setComments({ ...res.data, results: commentsWithReplies });
+    setOpenThreads({});
   };
 
   useEffect(() => {
@@ -120,6 +126,10 @@ export const PostCard = ({ post }) => {
       fetchComments();
     }
   }, [showComments, post.id]);
+
+  useEffect(() => {
+    setOpenThreads({});
+  }, [post.id]);
 
   const toggleLike = async () => {
     try {
@@ -243,6 +253,9 @@ export const PostCard = ({ post }) => {
           <button onClick={() => { setReplyingId(c.id); setReplyText(''); }} className="ml-1 text-xs text-indigo-500">
             Reply
           </button>
+          <button onClick={() => toggleReplies(c.id)} className="ml-1 text-xs">
+            💬 {c.replies?.length ?? 0}
+          </button>
           {loggedInUsername === c.author_username && (
             <>
               <button onClick={() => startEdit(c)} className="ml-1 text-xs text-indigo-500">
@@ -268,7 +281,7 @@ export const PostCard = ({ post }) => {
           </button>
         </form>
       )}
-      {c.replies?.map?.((r) => renderComment(r, depth + 1))}
+      {openThreads[c.id] && c.replies?.map?.((r) => renderComment(r, depth + 1))}
     </div>
   );
 
