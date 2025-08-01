@@ -30,7 +30,7 @@ const SavedPosts = () => {
       )}
       uniqueKey="saved-posts"
     >
-      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md">
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md max-h-64 overflow-y-auto sidebar-scrollbar">
         <ul className="space-y-1 text-gray-700 dark:text-gray-200">
         {loading
           ? Array.from({ length: 3 }).map((_, idx) => (

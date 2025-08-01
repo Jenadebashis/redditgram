@@ -59,7 +59,7 @@ const NotificationsPanel = () => {
       )}
       uniqueKey="notifications"
     >
-      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md">
+      <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-xl shadow-md max-h-64 overflow-y-auto sidebar-scrollbar">
         <div className="text-right mb-2 space-x-2 text-sm">
           <button onClick={markAllRead} className="hover:underline">
             Mark all as read
