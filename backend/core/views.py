@@ -163,7 +163,8 @@ class TrendingPostsView(ListCreateAPIView):
 
     def get_queryset(self):
         qs = Post.objects.all().prefetch_related("tags")
-        if self.request.query_params.get("sort") == "trending":
+        sort = self.request.query_params.get("sort")
+        if sort == "trending" or self.request.path.endswith("trending/"):
             qs = qs.annotate(like_count=Count("likes")).order_by("-like_count", "-created_at")
         else:
             qs = qs.order_by("-created_at")

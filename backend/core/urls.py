@@ -43,6 +43,7 @@ from .views import (
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='register'),
     path('me/', get_user_info, name='get_user_info'),
+    path('posts/trending/', TrendingPostsView.as_view(), name='posts-trending'),
     path('posts/', TrendingPostsView.as_view(), name='posts'),
     path('posts/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
     path('posts/<int:post_id>/comments/', CommentListCreateView.as_view(), name='comments'),
