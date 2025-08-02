@@ -56,10 +56,12 @@ npm run dev
 ```
 
 The frontend reads the backend URLs from the environment variables
-`VITE_API_BASE_URL` and `VITE_WS_BASE_URL`. If not provided, they default to
-`http://localhost:9000/api` and `ws://localhost:8000` respectively. Set
-`VITE_WS_BASE_URL` in your environment to override the WebSocket URL for other
-environments.
+`VITE_API_BASE_URL` and `VITE_WS_BASE_URL`. `VITE_API_BASE_URL` defaults to
+`http://localhost:9000/api`. If `VITE_WS_BASE_URL` is not provided, the
+WebSocket URL is derived from `VITE_API_BASE_URL` by swapping the protocol to
+`ws`/`wss` and using the same host and port. In other words, both endpoints
+share the same port unless you explicitly configure `VITE_WS_BASE_URL` to point
+elsewhere.
 
 The application will be available at `http://localhost:5173` by default. Build a
 production bundle with `npm run build` and preview it locally using `npm run preview`.
