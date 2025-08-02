@@ -20,6 +20,7 @@ function Navbar({ onToggleLeft, onToggleRight }) {
       .catch(() => setUser(null));
 
       const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/?token=${token}`);
+
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -32,8 +33,29 @@ function Navbar({ onToggleLeft, onToggleRight }) {
           console.error('Invalid WS message', err);
         }
       };
+
+      ws.onerror = (event) => {
+        console.error('WebSocket error', event);
+        toast.error('WebSocket error');
+      };
+
+      ws.onclose = (event) => {
+        console.warn('WebSocket closed', event);
+        toast.warn('Disconnected from notifications');
+      };
+
+      const heartbeat = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 30000);
+
       setSocket(ws);
-      return () => ws.close();
+
+      return () => {
+        ws.close();
+        clearInterval(heartbeat);
+      };
     }
   }, [token]);
 
