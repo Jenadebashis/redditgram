@@ -12,10 +12,26 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    RetrieveUpdateAPIView,
+)
 from rest_framework import status
-from django.db.models import Count
-from .models import Post, Comment, Like, CommentLike, Follow, Tag, Bookmark, Notification, Story
+from django.db.models import Count, Q
+from .models import (
+    Post,
+    Comment,
+    Like,
+    CommentLike,
+    Follow,
+    Tag,
+    Bookmark,
+    Notification,
+    Story,
+    Message,
+    NotificationPreference,
+)
 from .serializers import (
     PostSerializer,
     ProfileSerializer,
@@ -24,6 +40,8 @@ from .serializers import (
     BookmarkSerializer,
     NotificationSerializer,
     StorySerializer,
+    MessageSerializer,
+    NotificationPreferenceSerializer,
 )
 from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -516,6 +534,31 @@ class NotificationDetailView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
+
+
+class NotificationPreferenceView(RetrieveUpdateAPIView):
+    serializer_class = NotificationPreferenceSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        pref, _ = NotificationPreference.objects.get_or_create(user=self.request.user)
+        return pref
+
+
+class MessageListCreateView(ListCreateAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        other = User.objects.get(username=self.kwargs['username'])
+        user = self.request.user
+        return Message.objects.filter(
+            Q(sender=user, recipient=other) | Q(sender=other, recipient=user)
+        ).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        other = User.objects.get(username=self.kwargs['username'])
+        serializer.save(sender=self.request.user, recipient=other)
 
 
 @api_view(['POST'])

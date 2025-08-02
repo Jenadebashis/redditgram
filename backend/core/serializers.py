@@ -1,5 +1,15 @@
 from rest_framework import serializers
-from .models import Post, Profile, Comment, Tag, Bookmark, Notification, Story
+from .models import (
+    Post,
+    Profile,
+    Comment,
+    Tag,
+    Bookmark,
+    Notification,
+    Story,
+    Message,
+    NotificationPreference,
+)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -18,6 +28,7 @@ class PostSerializer(serializers.ModelSerializer):
     tag_names = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False
     )
+    is_edited = serializers.SerializerMethodField()
     class Meta:
         model = Post
         fields = [
@@ -29,6 +40,8 @@ class PostSerializer(serializers.ModelSerializer):
             'profession',
             'feeling',
             'created_at',
+            'updated_at',
+            'is_edited',
             'comment_count',
             'like_count',
             'is_liked',
@@ -37,7 +50,7 @@ class PostSerializer(serializers.ModelSerializer):
             'tags',
             'tag_names',
         ]
-        read_only_fields = ['author']
+        read_only_fields = ['author', 'created_at', 'updated_at']
 
     def get_comment_count(self, obj):
         return obj.comments.count()
@@ -69,6 +82,9 @@ class PostSerializer(serializers.ModelSerializer):
             url = avatar.url
             return request.build_absolute_uri(url) if request else url
         return None
+
+    def get_is_edited(self, obj):
+        return obj.created_at != obj.updated_at
 
     def create(self, validated_data):
         tag_names = validated_data.pop('tag_names', [])
@@ -148,6 +164,35 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'user', 'from_user', 'from_username', 'notification_type', 'post', 'created_at', 'is_read']
         read_only_fields = ['user', 'from_user', 'created_at']
+
+
+class MessageSerializer(serializers.ModelSerializer):
+    sender_username = serializers.CharField(source='sender.username', read_only=True)
+    recipient_username = serializers.CharField(source='recipient.username', read_only=True)
+
+    class Meta:
+        model = Message
+        fields = [
+            'id',
+            'sender',
+            'sender_username',
+            'recipient',
+            'recipient_username',
+            'content',
+            'created_at',
+        ]
+        read_only_fields = ['sender', 'created_at']
+
+
+class NotificationPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationPreference
+        fields = [
+            'notify_on_like',
+            'notify_on_comment',
+            'notify_on_follow',
+            'email_digest',
+        ]
 
 
 class StorySerializer(serializers.ModelSerializer):
