@@ -333,7 +333,9 @@ export const PostCard = ({ post }) => {
             <BookmarkIconOutline className="w-4 h-4 inline" />
           )}
         </button>
-        <span className="ml-auto text-xs text-white/80">{timeAgo}</span>
+        <span className="ml-auto text-xs text-white/80">
+          {timeAgo} {post.is_edited && '(edited)'}
+        </span>
       </div>
 
       {showComments && (

@@ -43,6 +43,7 @@ class Post(models.Model):
         null=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'{self.author.username} - {self.caption[:30]}'
@@ -152,6 +153,34 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.notification_type} -> {self.user.username}"
+
+
+class NotificationPreference(models.Model):
+    """Per-user notification settings."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="notification_preference")
+    notify_on_like = models.BooleanField(default=True)
+    notify_on_comment = models.BooleanField(default=True)
+    notify_on_follow = models.BooleanField(default=True)
+    email_digest = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Notification prefs for {self.user.username}"
+
+
+class Message(models.Model):
+    """Direct message between two users."""
+
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.sender.username} -> {self.recipient.username}"
 
 
 class Story(models.Model):

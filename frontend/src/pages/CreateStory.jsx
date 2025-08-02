@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import API from '../api';
 
 function CreateStory() {
@@ -10,7 +11,7 @@ function CreateStory() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return alert('Please select a file');
+    if (!file) return toast.error('Please select a file');
     const formData = new FormData();
     formData.append('file', file);
     formData.append('caption', caption);
@@ -20,9 +21,9 @@ function CreateStory() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       navigate('/feed');
+      toast.success('Story created');
     } catch (err) {
-      console.error(err);
-      alert('Failed to create story');
+      toast.error('Failed to create story');
     }
   };
 

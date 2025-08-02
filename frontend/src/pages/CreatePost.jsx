@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
 import { API_BASE_URL } from '../config';
 
 function CreatePost() {
-  const [caption, setCaption] = useState('');
+  const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [tags, setTags] = useState('');
   const [userProfession, setUserProfession] = useState('');
   const [profession, setProfession] = useState('');
@@ -24,16 +26,12 @@ function CreatePost() {
       .catch(() => {});
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!caption.trim()) return alert("Caption cannot be empty.");
-
+  const onSubmit = async (data) => {
     try {
       await axios.post(
         `${API_BASE_URL}/posts/`,
         {
-          caption,
+          caption: data.caption,
           profession,
           feeling,
           tag_names: tags.split(',').map(t => t.trim()).filter(Boolean),
@@ -44,23 +42,26 @@ function CreatePost() {
           },
         }
       );
-
+      toast.success('Post created');
+      reset();
+      setTags('');
       navigate('/');
     } catch (err) {
-      console.error(err);
-      alert('Post creation failed');
+      toast.error('Post creation failed');
     }
   };
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <textarea
-        value={caption}
-        onChange={(e) => setCaption(e.target.value)}
-        placeholder="What's on your mind?"
-        className="w-full p-2 border rounded"
-      />
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <textarea
+          {...register('caption', { required: 'Caption cannot be empty' })}
+          placeholder="What's on your mind?"
+          className="w-full p-2 border rounded"
+        />
+        {errors.caption && <p className="text-red-500 text-sm">{errors.caption.message}</p>}
+      </div>
       <input
         type="text"
         value={tags}
