@@ -22,14 +22,28 @@ pip install -r requirements.txt
 
 ## Running the backend
 
-Activate the virtual environment and start the Django development server:
+Activate the virtual environment and start the ASGI server:
 
 ```bash
 source env/bin/activate
 cd backend
 python manage.py migrate
-python manage.py runserver
+daphne backend.asgi:application --port 8000  # or `python manage.py runserver`
 ```
+
+Both `daphne` and Channels' `runserver` command serve the project via ASGI.
+Ensure an ASGI server is used in production to handle WebSocket traffic.
+
+### Verify WebSocket connectivity
+
+After the server starts, connect with a WebSocket client such as
+[wscat](https://github.com/websockets/wscat):
+
+```bash
+npx wscat -c ws://localhost:8000/ws/notifications/
+```
+
+A successful connection confirms the ASGI server is handling WebSockets.
 
 ## Running the frontend
 
