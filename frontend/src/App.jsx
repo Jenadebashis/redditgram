@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import CreatePost from './pages/CreatePost';
+import CreateStory from './pages/CreateStory';
 import PostDetail from './pages/PostDetail';
 import UserPosts from './pages/UserPosts'; // ← NEW
 import FollowersList from './pages/FollowersList';
@@ -39,6 +40,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/create" element={<CreatePost />} />
+            <Route path="/create-story" element={<CreateStory />} />
             <Route path="/posts/:id" element={<PostDetail />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/search" element={<Search />} />

@@ -64,3 +64,7 @@ Run frontend tests using `npm`:
 cd frontend
 npm test
 ```
+
+## Stories
+
+Authenticated users can create 24-hour stories via `/create-story` in the UI. Stories are retrieved from `/api/stories/` and expire based on the `expires_at` value provided when creating them.
