@@ -7,14 +7,11 @@ import { WS_BASE_URL } from '../config';
 const Chat = () => {
   const { username } = useParams();
   const [messages, setMessages] = useState([]);
+  const [error, setError] = useState('');
   const ws = useRef(null);
   const { register, handleSubmit, reset } = useForm();
 
-  useEffect(() => {
-    API.get(`/messages/${username}/`).then((res) => {
-      const data = res.data.results || res.data;
-      setMessages(data.reverse());
-    });
+  const connectSocket = () => {
     const token = localStorage.getItem('access');
     const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${username}/?token=${token}`);
     ws.current = socket;
@@ -22,13 +19,28 @@ const Chat = () => {
       const msg = JSON.parse(e.data);
       setMessages((prev) => [...prev, msg]);
     };
-    return () => socket.close();
+    socket.onopen = () => setError('');
+    socket.onerror = () => setError('Unable to connect to chat.');
+  };
+
+  useEffect(() => {
+    API.get(`/messages/${username}/`).then((res) => {
+      const data = res.data.results || res.data;
+      setMessages(data.reverse());
+    });
+    connectSocket();
+    return () => ws.current && ws.current.close();
   }, [username]);
 
   const onSubmit = (data) => {
     if (!ws.current) return;
-    ws.current.send(JSON.stringify({ message: data.message }));
-    reset();
+    if (ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ message: data.message }));
+      reset();
+    } else {
+      setError('Connection lost. Reconnecting...');
+      connectSocket();
+    }
   };
 
   return (
@@ -41,6 +53,7 @@ const Chat = () => {
           </li>
         ))}
       </ul>
+      {error && <p className="text-red-500 mb-2">{error}</p>}
       <form onSubmit={handleSubmit(onSubmit)} className="flex space-x-2">
         <input
           {...register('message', { required: true })}
