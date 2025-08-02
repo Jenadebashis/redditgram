@@ -12,6 +12,7 @@ const Chat = () => {
   const { register, handleSubmit, reset } = useForm();
 
   const connectSocket = () => {
+    if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
     const token = localStorage.getItem('access');
     const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${username}/?token=${token}`);
     ws.current = socket;
@@ -21,6 +22,13 @@ const Chat = () => {
     };
     socket.onopen = () => setError('');
     socket.onerror = () => setError('Unable to connect to chat.');
+    socket.onclose = () => {
+      setError('Connection lost. Reconnecting...');
+      ws.current = null;
+      setTimeout(() => {
+        if (!ws.current) connectSocket();
+      }, 1000);
+    };
   };
 
   useEffect(() => {
@@ -39,7 +47,9 @@ const Chat = () => {
       reset();
     } else {
       setError('Connection lost. Reconnecting...');
-      connectSocket();
+      if (!ws.current || ws.current.readyState === WebSocket.CLOSED) {
+        connectSocket();
+      }
     }
   };
 
