@@ -12,6 +12,7 @@ from .models import (
 )
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from .serializers import NotificationSerializer
 
 @receiver(post_save, sender=User)
 def create_or_update_profile(sender, instance, created, **kwargs):
@@ -25,23 +26,20 @@ def send_like_notification(sender, instance, created, **kwargs):
     if not created:
         return
     channel_layer = get_channel_layer()
-    pref = getattr(instance.post.author, 'notification_preference', None)
-    if not pref or pref.notify_on_like:
-        data = {
-            'type': 'notify',
-            'data': {
-                'type': 'like',
-                'post_id': instance.post.id,
-                'by': instance.user.username,
-            }
-        }
-        async_to_sync(channel_layer.group_send)(f'user_{instance.post.author_id}', data)
-    Notification.objects.create(
+    notification = Notification.objects.create(
         user=instance.post.author,
         from_user=instance.user,
         notification_type='like',
         post=instance.post,
     )
+    pref = getattr(instance.post.author, 'notification_preference', None)
+    if not pref or pref.notify_on_like:
+        payload = NotificationSerializer(notification).data
+        data = {
+            'type': 'notify',
+            'data': payload,
+        }
+        async_to_sync(channel_layer.group_send)(f'user_{instance.post.author_id}', data)
 
 
 @receiver(post_save, sender=Comment)
@@ -49,24 +47,20 @@ def send_comment_notification(sender, instance, created, **kwargs):
     if not created:
         return
     channel_layer = get_channel_layer()
-    pref = getattr(instance.post.author, 'notification_preference', None)
-    if not pref or pref.notify_on_comment:
-        data = {
-            'type': 'notify',
-            'data': {
-                'type': 'comment',
-                'post_id': instance.post.id,
-                'by': instance.author.username,
-                'text': instance.text,
-            }
-        }
-        async_to_sync(channel_layer.group_send)(f'user_{instance.post.author_id}', data)
-    Notification.objects.create(
+    notification = Notification.objects.create(
         user=instance.post.author,
         from_user=instance.author,
         notification_type='comment',
         post=instance.post,
     )
+    pref = getattr(instance.post.author, 'notification_preference', None)
+    if not pref or pref.notify_on_comment:
+        payload = NotificationSerializer(notification).data
+        data = {
+            'type': 'notify',
+            'data': payload,
+        }
+        async_to_sync(channel_layer.group_send)(f'user_{instance.post.author_id}', data)
 
 
 
@@ -75,18 +69,16 @@ def send_follow_notification(sender, instance, created, **kwargs):
     if not created:
         return
     channel_layer = get_channel_layer()
-    pref = getattr(instance.following, 'notification_preference', None)
-    if not pref or pref.notify_on_follow:
-        data = {
-            'type': 'notify',
-            'data': {
-                'type': 'follow',
-                'by': instance.follower.username,
-            }
-        }
-        async_to_sync(channel_layer.group_send)(f'user_{instance.following_id}', data)
-    Notification.objects.create(
+    notification = Notification.objects.create(
         user=instance.following,
         from_user=instance.follower,
         notification_type='follow',
     )
+    pref = getattr(instance.following, 'notification_preference', None)
+    if not pref or pref.notify_on_follow:
+        payload = NotificationSerializer(notification).data
+        data = {
+            'type': 'notify',
+            'data': payload,
+        }
+        async_to_sync(channel_layer.group_send)(f'user_{instance.following_id}', data)

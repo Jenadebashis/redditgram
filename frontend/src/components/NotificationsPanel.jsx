@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BellIcon } from "@heroicons/react/24/outline";
 import API from "../api";
 import CollapsibleSection from "./CollapsibleSection";
+import { WS_BASE_URL } from "../config";
 
 const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
@@ -15,6 +16,23 @@ const NotificationsPanel = () => {
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    if (!token) return;
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/`, token);
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        setNotes((prev) => [data, ...prev]);
+      } catch (err) {
+        console.error("Invalid WS message", err);
+      }
+    };
+
+    return () => ws.close();
   }, []);
 
   const markAllRead = () => {
