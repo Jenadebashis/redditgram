@@ -14,7 +14,7 @@ const Chat = () => {
   const connectSocket = () => {
     if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
     const token = localStorage.getItem('access');
-    const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${username}/?token=${token}`);
+    const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${username}/`, token);
     ws.current = socket;
     socket.onmessage = (e) => {
       const msg = JSON.parse(e.data);
