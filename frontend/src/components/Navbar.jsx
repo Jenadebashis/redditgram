@@ -19,7 +19,7 @@ function Navbar({ onToggleLeft, onToggleRight }) {
       .then(res => setUser(res.data))
       .catch(() => setUser(null));
 
-      const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/?token=${token}`);
+      const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/`, token);
 
       ws.onmessage = (event) => {
         try {
