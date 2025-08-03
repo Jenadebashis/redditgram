@@ -16,6 +16,7 @@ const Chat = () => {
   const ws = useRef(null);
   const retryDelayRef = useRef(INITIAL_RETRY_DELAY);
   const { register, handleSubmit, reset } = useForm();
+  const currentUser = localStorage.getItem('username');
 
   const connectSocket = () => {
     if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
@@ -100,6 +101,14 @@ const Chat = () => {
   const onSubmit = (data) => {
     if (!ws.current) return;
     if (ws.current.readyState === WebSocket.OPEN) {
+      const optimisticMessage = {
+        id: `temp-${Date.now()}`,
+        sender: currentUser || 'You',
+        recipient: username,
+        content: data.message,
+        created_at: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, optimisticMessage]);
       ws.current.send(JSON.stringify({ message: data.message }));
       reset();
     } else {
