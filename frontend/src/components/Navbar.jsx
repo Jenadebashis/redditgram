@@ -28,6 +28,8 @@ function Navbar({ onToggleLeft, onToggleRight }) {
             toast.info(`Your post ${data.post_id} was liked by ${data.by}`);
           } else if (data.type === 'comment') {
             toast.info(`${data.by} commented on your post`);
+          } else if (data.type === 'follow') {
+            toast.info(`${data.by} followed you`);
           }
         } catch (err) {
           console.error('Invalid WS message', err);
