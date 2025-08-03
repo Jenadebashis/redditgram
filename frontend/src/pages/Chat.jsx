@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import API from '../api';
 import { WS_BASE_URL } from '../config';
@@ -9,6 +9,7 @@ const MAX_RETRY_DELAY = 16000;
 
 const Chat = () => {
   const { username } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState('');
   const [retryAttempt, setRetryAttempt] = useState(0);
@@ -19,7 +20,14 @@ const Chat = () => {
   const connectSocket = () => {
     if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
     const token = localStorage.getItem('access');
-    const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${username}/?token=${token}`);
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      navigate('/login');
+      return;
+    }
+    const socket = new WebSocket(
+      `${WS_BASE_URL}/ws/chat/${username}/?token=${token}`,
+    );
     ws.current = socket;
     socket.onmessage = (e) => {
       const msg = JSON.parse(e.data);
@@ -30,8 +38,35 @@ const Chat = () => {
       retryDelayRef.current = INITIAL_RETRY_DELAY;
       setRetryAttempt(0);
     };
-    socket.onerror = () => setError('Unable to connect to chat.');
-    socket.onclose = () => {
+
+    const isDev = import.meta.env.DEV;
+
+    const getMessage = (event, fallback) => {
+      if (event.code === 4401) return 'Authentication failed';
+      if (event.code === 1006) return 'Server unavailable';
+      return fallback;
+    };
+
+    socket.onerror = (event) => {
+      if (isDev) {
+        console.error('WebSocket error', {
+          code: event.code,
+          reason: event.reason,
+          readyState: socket.readyState
+        });
+      }
+      setError(getMessage(event, 'Unable to connect to chat.'));
+    };
+
+    socket.onclose = (event) => {
+      if (isDev) {
+        console.warn('WebSocket closed', {
+          code: event.code,
+          reason: event.reason,
+          readyState: socket.readyState
+        });
+      }
+      setError(getMessage(event, 'Connection lost. Reconnecting...'));
       ws.current = null;
       const delay = retryDelayRef.current;
       setRetryAttempt((prev) => {
@@ -47,13 +82,19 @@ const Chat = () => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('access');
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      navigate('/login');
+      return;
+    }
     API.get(`/messages/${username}/`).then((res) => {
       const data = res.data.results || res.data;
       setMessages(data.reverse());
     });
     connectSocket();
     return () => ws.current && ws.current.close();
-  }, [username]);
+  }, [username, navigate]);
 
   const onSubmit = (data) => {
     if (!ws.current) return;

@@ -1,4 +1,3 @@
-from urllib.parse import parse_qs
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
@@ -18,9 +17,10 @@ class JWTAuthMiddleware:
         self.inner = inner
 
     async def __call__(self, scope, receive, send):
-        query = parse_qs(scope.get('query_string', b'').decode())
-        token = query.get('token')
-        scope['user'] = await get_user(token[0]) if token else AnonymousUser()
+        headers = dict(scope.get('headers', []))
+        token_header = headers.get(b'sec-websocket-protocol') or headers.get(b'authorization')
+        token = token_header.decode().split('Bearer ')[-1] if token_header else None
+        scope['user'] = await get_user(token) if token else AnonymousUser()
         return await self.inner(scope, receive, send)
 
 def JWTAuthMiddlewareStack(inner):
