@@ -8,8 +8,14 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 import core.routing  # safe now
 from core.middleware import JWTAuthMiddlewareStack
 
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+
+django_asgi_app = get_asgi_application()
+
+import core.routing
+
 application = ProtocolTypeRouter({
-    'http': get_asgi_application(),
+    'http': django_asgi_app,
     'websocket': JWTAuthMiddlewareStack(
         URLRouter(core.routing.websocket_urlpatterns)
     )
