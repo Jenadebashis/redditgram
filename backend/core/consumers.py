@@ -12,7 +12,9 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             return
         self.group_name = f'user_{user.id}'
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
+        await self.accept(
+            subprotocol=self.scope['subprotocols'][0] if self.scope['subprotocols'] else None
+        )
 
     async def disconnect(self, close_code):
         if hasattr(self, 'group_name'):
@@ -45,7 +47,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         self.group_name = f"chat_{ids[0]}_{ids[1]}"
         self.other_id = other.id
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
+        await self.accept(
+            subprotocol=self.scope['subprotocols'][0] if self.scope['subprotocols'] else None
+        )
 
     async def disconnect(self, close_code):
         if hasattr(self, 'group_name'):
