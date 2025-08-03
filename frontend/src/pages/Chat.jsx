@@ -26,7 +26,8 @@ const Chat = () => {
       return;
     }
     const socket = new WebSocket(
-      `${WS_BASE_URL}/ws/chat/${username}/?token=${token}`,
+      `${WS_BASE_URL}/ws/chat/${username}/`,
+      token,
     );
     ws.current = socket;
     socket.onmessage = (e) => {
