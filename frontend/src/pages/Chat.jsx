@@ -21,9 +21,35 @@ const Chat = () => {
       setMessages((prev) => [...prev, msg]);
     };
     socket.onopen = () => setError('');
-    socket.onerror = () => setError('Unable to connect to chat.');
-    socket.onclose = () => {
-      setError('Connection lost. Reconnecting...');
+
+    const isDev = import.meta.env.DEV;
+
+    const getMessage = (event, fallback) => {
+      if (event.code === 4401) return 'Authentication failed';
+      if (event.code === 1006) return 'Server unavailable';
+      return fallback;
+    };
+
+    socket.onerror = (event) => {
+      if (isDev) {
+        console.error('WebSocket error', {
+          code: event.code,
+          reason: event.reason,
+          readyState: socket.readyState
+        });
+      }
+      setError(getMessage(event, 'Unable to connect to chat.'));
+    };
+
+    socket.onclose = (event) => {
+      if (isDev) {
+        console.warn('WebSocket closed', {
+          code: event.code,
+          reason: event.reason,
+          readyState: socket.readyState
+        });
+      }
+      setError(getMessage(event, 'Connection lost. Reconnecting...'));
       ws.current = null;
       setTimeout(() => {
         if (!ws.current) connectSocket();

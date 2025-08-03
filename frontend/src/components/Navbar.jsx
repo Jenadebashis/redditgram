@@ -34,14 +34,34 @@ function Navbar({ onToggleLeft, onToggleRight }) {
         }
       };
 
+      const isDev = import.meta.env.DEV;
+
+      const getMessage = (event, fallback) => {
+        if (event.code === 4401) return 'Authentication failed';
+        if (event.code === 1006) return 'Server unavailable';
+        return fallback;
+      };
+
       ws.onerror = (event) => {
-        console.error('WebSocket error', event);
-        toast.error('WebSocket error');
+        if (isDev) {
+          console.error('WebSocket error', {
+            code: event.code,
+            reason: event.reason,
+            readyState: ws.readyState
+          });
+        }
+        toast.error(getMessage(event, 'WebSocket error'));
       };
 
       ws.onclose = (event) => {
-        console.warn('WebSocket closed', event);
-        toast.warn('Disconnected from notifications');
+        if (isDev) {
+          console.warn('WebSocket closed', {
+            code: event.code,
+            reason: event.reason,
+            readyState: ws.readyState
+          });
+        }
+        toast.warn(getMessage(event, 'Disconnected from notifications'));
       };
 
       const heartbeat = setInterval(() => {
