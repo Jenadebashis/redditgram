@@ -21,6 +21,12 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
     async def notify(self, event):
         await self.send_json(event['data'])
 
+    async def receive_json(self, content, **kwargs):
+        message_type = content.get('type')
+        if message_type == 'ping':
+            await self.send_json({'type': 'pong'})
+        # Safely ignore any other incoming messages to keep the connection open
+
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
