@@ -1,21 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { BellIcon } from "@heroicons/react/24/outline";
 import API from "../api";
+import { WS_BASE_URL } from "../config";
 import CollapsibleSection from "./CollapsibleSection";
 
 const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    API.get("/notifications/?unread_first=true")
+  const fetchNotifications = useCallback(() => {
+    return API.get("/notifications/?unread_first=true")
       .then((res) => {
         const list = res.data.results || res.data;
         setNotes(list);
       })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+      .catch((err) => console.error(err));
   }, []);
+
+  useEffect(() => {
+    fetchNotifications().finally(() => setLoading(false));
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    if (!token) return;
+    const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/`, token);
+    ws.onmessage = () => {
+      fetchNotifications();
+    };
+    return () => ws.close();
+  }, [fetchNotifications]);
 
   const markAllRead = () => {
     API.post("/notifications/mark_all_read/")
