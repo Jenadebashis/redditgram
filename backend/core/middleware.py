@@ -18,8 +18,16 @@ class JWTAuthMiddleware:
 
     async def __call__(self, scope, receive, send):
         headers = dict(scope.get('headers', []))
-        token_header = headers.get(b'sec-websocket-protocol') or headers.get(b'authorization')
-        token = token_header.decode().split('Bearer ')[-1] if token_header else None
+        subprotocols = scope.get('subprotocols', [])
+        token_header = headers.get(b'sec-websocket-protocol')
+        token = None
+        if token_header:
+            token = token_header.decode().split('Bearer ')[-1]
+        elif subprotocols:
+            token = subprotocols[0]
+        else:
+            auth_header = headers.get(b'authorization')
+            token = auth_header.decode().split('Bearer ')[-1] if auth_header else None
         scope['user'] = await get_user(token) if token else AnonymousUser()
         return await self.inner(scope, receive, send)
 
