@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import API from '../api';
 import { WS_BASE_URL } from '../config';
 
 const Chat = () => {
   const { username } = useParams();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState('');
   const ws = useRef(null);
@@ -14,7 +15,14 @@ const Chat = () => {
   const connectSocket = () => {
     if (ws.current && ws.current.readyState !== WebSocket.CLOSED) return;
     const token = localStorage.getItem('access');
-    const socket = new WebSocket(`${WS_BASE_URL}/ws/chat/${username}/`, token);
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      navigate('/login');
+      return;
+    }
+    const socket = new WebSocket(
+      `${WS_BASE_URL}/ws/chat/${username}/?token=${token}`,
+    );
     ws.current = socket;
     socket.onmessage = (e) => {
       const msg = JSON.parse(e.data);
@@ -32,13 +40,19 @@ const Chat = () => {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('access');
+    if (!token) {
+      setError('Authentication required. Please log in.');
+      navigate('/login');
+      return;
+    }
     API.get(`/messages/${username}/`).then((res) => {
       const data = res.data.results || res.data;
       setMessages(data.reverse());
     });
     connectSocket();
     return () => ws.current && ws.current.close();
-  }, [username]);
+  }, [username, navigate]);
 
   const onSubmit = (data) => {
     if (!ws.current) return;
