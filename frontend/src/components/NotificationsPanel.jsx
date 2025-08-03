@@ -3,6 +3,7 @@ import { BellIcon } from "@heroicons/react/24/outline";
 import API from "../api";
 import { WS_BASE_URL } from "../config";
 import CollapsibleSection from "./CollapsibleSection";
+import { WS_BASE_URL } from "../config";
 
 const NotificationsPanel = () => {
   const [notes, setNotes] = useState([]);
