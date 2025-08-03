@@ -4,11 +4,16 @@ import { useForm } from 'react-hook-form';
 import API from '../api';
 import { WS_BASE_URL } from '../config';
 
+const INITIAL_RETRY_DELAY = 1000;
+const MAX_RETRY_DELAY = 16000;
+
 const Chat = () => {
   const { username } = useParams();
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState('');
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const ws = useRef(null);
+  const retryDelayRef = useRef(INITIAL_RETRY_DELAY);
   const { register, handleSubmit, reset } = useForm();
 
   const connectSocket = () => {
@@ -20,14 +25,24 @@ const Chat = () => {
       const msg = JSON.parse(e.data);
       setMessages((prev) => [...prev, msg]);
     };
-    socket.onopen = () => setError('');
+    socket.onopen = () => {
+      setError('');
+      retryDelayRef.current = INITIAL_RETRY_DELAY;
+      setRetryAttempt(0);
+    };
     socket.onerror = () => setError('Unable to connect to chat.');
     socket.onclose = () => {
-      setError('Connection lost. Reconnecting...');
       ws.current = null;
+      const delay = retryDelayRef.current;
+      setRetryAttempt((prev) => {
+        const next = prev + 1;
+        setError(`Connection lost. Reconnecting in ${delay / 1000}s (attempt ${next})...`);
+        return next;
+      });
       setTimeout(() => {
         if (!ws.current) connectSocket();
-      }, 1000);
+      }, delay);
+      retryDelayRef.current = Math.min(delay * 2, MAX_RETRY_DELAY);
     };
   };
 
