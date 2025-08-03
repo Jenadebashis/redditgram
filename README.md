@@ -22,14 +22,28 @@ pip install -r requirements.txt
 
 ## Running the backend
 
-Activate the virtual environment and start the Django development server:
+Activate the virtual environment and start the ASGI server:
 
 ```bash
 source env/bin/activate
 cd backend
 python manage.py migrate
-python manage.py runserver
+daphne backend.asgi:application --port 8000  # or `python manage.py runserver`
 ```
+
+Both `daphne` and Channels' `runserver` command serve the project via ASGI.
+Ensure an ASGI server is used in production to handle WebSocket traffic.
+
+### Verify WebSocket connectivity
+
+After the server starts, connect with a WebSocket client such as
+[wscat](https://github.com/websockets/wscat):
+
+```bash
+npx wscat -c ws://localhost:8000/ws/notifications/
+```
+
+A successful connection confirms the ASGI server is handling WebSockets.
 
 ## Running the frontend
 
@@ -42,8 +56,12 @@ npm run dev
 ```
 
 The frontend reads the backend URLs from the environment variables
-`VITE_API_BASE_URL` and `VITE_WS_BASE_URL`. If not provided, they default to
-`http://localhost:9000/api` and `ws://localhost:9000` respectively.
+`VITE_API_BASE_URL` and `VITE_WS_BASE_URL`. `VITE_API_BASE_URL` defaults to
+`http://localhost:9000/api`. If `VITE_WS_BASE_URL` is not provided, the
+WebSocket URL is derived from `VITE_API_BASE_URL` by swapping the protocol to
+`ws`/`wss` and using the same host and port. In other words, both endpoints
+share the same port unless you explicitly configure `VITE_WS_BASE_URL` to point
+elsewhere.
 
 The application will be available at `http://localhost:5173` by default. Build a
 production bundle with `npm run build` and preview it locally using `npm run preview`.

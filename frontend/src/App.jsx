@@ -21,6 +21,8 @@ import Search from './pages/Search';
 import PasswordResetRequest from './pages/PasswordResetRequest';
 import PasswordResetConfirm from './pages/PasswordResetConfirm';
 import VerifyEmail from './pages/VerifyEmail';
+import Chat from './pages/Chat';
+import NotificationSettings from './pages/NotificationSettings';
 
 function App() {
   const [showLeft, setShowLeft] = useState(false);
@@ -54,6 +56,8 @@ function App() {
             <Route path="/password-reset" element={<PasswordResetRequest />} />
             <Route path="/reset-password-confirm" element={<PasswordResetConfirm />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/chat/:username" element={<Chat />} />
+            <Route path="/settings/notifications" element={<NotificationSettings />} />
           </Routes>
         </main>
         <RightSidebar mobileOpen={showRight} setMobileOpen={setShowRight} />

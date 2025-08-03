@@ -19,7 +19,8 @@ function Navbar({ onToggleLeft, onToggleRight }) {
       .then(res => setUser(res.data))
       .catch(() => setUser(null));
 
-      const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/?token=${token}`);
+      const ws = new WebSocket(`${WS_BASE_URL}/ws/notifications/`, token);
+
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -32,8 +33,49 @@ function Navbar({ onToggleLeft, onToggleRight }) {
           console.error('Invalid WS message', err);
         }
       };
+
+      const isDev = import.meta.env.DEV;
+
+      const getMessage = (event, fallback) => {
+        if (event.code === 4401) return 'Authentication failed';
+        if (event.code === 1006) return 'Server unavailable';
+        return fallback;
+      };
+
+      ws.onerror = (event) => {
+        if (isDev) {
+          console.error('WebSocket error', {
+            code: event.code,
+            reason: event.reason,
+            readyState: ws.readyState
+          });
+        }
+        toast.error(getMessage(event, 'WebSocket error'));
+      };
+
+      ws.onclose = (event) => {
+        if (isDev) {
+          console.warn('WebSocket closed', {
+            code: event.code,
+            reason: event.reason,
+            readyState: ws.readyState
+          });
+        }
+        toast.warn(getMessage(event, 'Disconnected from notifications'));
+      };
+
+      const heartbeat = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 30000);
+
       setSocket(ws);
-      return () => ws.close();
+
+      return () => {
+        ws.close();
+        clearInterval(heartbeat);
+      };
     }
   }, [token]);
 

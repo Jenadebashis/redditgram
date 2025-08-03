@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API, { likeComment } from "../api";
 import { motion } from "framer-motion";
-import { BookmarkIcon as BookmarkIconOutline } from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkIconOutline, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkIconSolid } from "@heroicons/react/24/solid";
 import { formatDistanceToNow } from "date-fns";
 // Utility to generate background color from username and caption
@@ -296,21 +296,28 @@ export const PostCard = ({ post }) => {
       className={`${bgColor} text-white rounded-xl p-5 mb-5 shadow-sm hover:shadow-lg transition-all duration-300`}
     >
       {/* Header */}
-      <div className="flex items-center space-x-3 mb-3">
-        {avatarImage ? (
-          <img
-            src={avatarImage}
-            alt={post.author_username}
-            className="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
-          />
-        ) : (
-          <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold bg-white text-black shadow">
-            {initial}
-          </div>
+      <div className="flex items-center mb-3">
+        <div className="flex items-center space-x-3">
+          {avatarImage ? (
+            <img
+              src={avatarImage}
+              alt={post.author_username}
+              className="w-9 h-9 rounded-full object-cover border-2 border-white shadow"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold bg-white text-black shadow">
+              {initial}
+            </div>
+          )}
+          <Link to={`/user/${post.author_username}`} className="font-medium text-white text-sm hover:underline">
+            @{post.author_username}
+          </Link>
+        </div>
+        {post.author_username === loggedInUsername && (
+          <Link to={`/posts/${post.id}`} className="ml-auto">
+            <PencilSquareIcon className="w-5 h-5 text-white" />
+          </Link>
         )}
-        <Link to={`/user/${post.author_username}`} className="font-medium text-white text-sm hover:underline">
-          @{post.author_username}
-        </Link>
       </div>
 
       {/* Caption */}
@@ -333,7 +340,9 @@ export const PostCard = ({ post }) => {
             <BookmarkIconOutline className="w-4 h-4 inline" />
           )}
         </button>
-        <span className="ml-auto text-xs text-white/80">{timeAgo}</span>
+        <span className="ml-auto text-xs text-white/80">
+          {timeAgo} {post.is_edited && '(edited)'}
+        </span>
       </div>
 
       {showComments && (

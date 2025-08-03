@@ -184,11 +184,18 @@ class AdditionalViewsTestCase(TestCase):
         Notification.objects.create(user=self.user, from_user=self.user2, notification_type="follow")
 
     def test_trending_posts(self):
-        url = reverse("posts") + "?sort=trending"
+        url = reverse("posts-trending")
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(resp.data["results"]), 1)
         # first post should be post2 with more likes
+        self.assertEqual(resp.data["results"][0]["id"], self.post2.id)
+
+    def test_trending_posts_old_url(self):
+        url = reverse("posts") + "?sort=trending"
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertGreaterEqual(len(resp.data["results"]), 1)
         self.assertEqual(resp.data["results"][0]["id"], self.post2.id)
 
     def test_tag_endpoints(self):

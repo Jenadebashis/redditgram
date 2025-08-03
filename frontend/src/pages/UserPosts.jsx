@@ -128,9 +128,14 @@ const UserPosts = () => {
               </p>
             )}
             {!isOwner && (
-              <button onClick={toggleFollow} className="mt-2 text-sm text-indigo-500 hover:underline">
-                {following ? 'Unfollow' : 'Follow'}
-              </button>
+              <>
+                <button onClick={toggleFollow} className="mt-2 text-sm text-indigo-500 hover:underline">
+                  {following ? 'Unfollow' : 'Follow'}
+                </button>
+                <Link to={`/chat/${username}`} className="mt-2 text-sm text-indigo-500 hover:underline">
+                  Message
+                </Link>
+              </>
             )}
             {isOwner && (
               <>
